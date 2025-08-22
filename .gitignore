@@ -13,3 +13,15 @@
 .vscode-test-server-insiders/
 .vscode-test-server-oss/
 .kilo/
+.qoder/
+.vim/
+.dart/
+.dart_tool/
+.pub/
+.pub-cache/
+.rustup/
+.rustup-toolchain-installer/
+.rustup-toolchain-installer-cache/
+.rustup-toolchain-installer-cache-lock/
+.rustup-toolchain-installer-cache-lock-file/
+.rustup-toolchain-installer-cache-lock-file-lock/
