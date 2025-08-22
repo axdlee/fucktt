@@ -1,0 +1,15 @@
+.claude/
+.cursors/
+.idea/
+.vscode/
+.vscode-insiders/
+.vscode-oss/
+.vscode-server/
+.vscode-server-insiders/
+.vscode-test/
+.vscode-test-insiders/
+.vscode-test-oss/
+.vscode-test-server/
+.vscode-test-server-insiders/
+.vscode-test-server-oss/
+.kilo/
