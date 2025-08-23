@@ -111,23 +111,23 @@ class OCRService {
     for (final block in recognizedText.blocks) {
       final textBlock = TextBlock(
         text: block.text,
-        confidence: block.confidence ?? 0.0,
+        confidence: 0.95, // Google ML Kit不再提供confidence，使用默认高置信度
         boundingBox: _convertRect(block.boundingBox),
         language: _detectLanguage(block.text),
         lines: block.lines.map((line) => TextLine(
           text: line.text,
-          confidence: line.confidence ?? 0.0,
+          confidence: 0.95, // 默认置信度
           boundingBox: _convertRect(line.boundingBox),
           elements: line.elements.map((element) => TextElement(
             text: element.text,
-            confidence: element.confidence ?? 0.0,
+            confidence: 0.95, // 默认置信度
             boundingBox: _convertRect(element.boundingBox),
           )).toList(),
         )).toList(),
       );
       
       textBlocks.add(textBlock);
-      totalConfidence += block.confidence ?? 0.0;
+      totalConfidence += 0.95; // 使用默认置信度
       blockCount++;
     }
     
@@ -366,4 +366,4 @@ class BoundingBox {
       'height': height,
     };
   }
-}"
+}

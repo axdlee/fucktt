@@ -110,7 +110,9 @@ class AIRequest {
     if (stop != null && stop!.isNotEmpty) json['stop'] = stop;
 
     // 添加自定义参数
-    json.addAll(customParameters);
+    for (final entry in customParameters.entries) {
+      json[entry.key] = entry.value;
+    }
 
     return json;
   }
@@ -134,7 +136,9 @@ class ChatMessage {
       'content': content,
     };
     if (metadata != null) {
-      json.addAll(metadata!);
+      for (final entry in metadata!.entries) {
+        json[entry.key] = entry.value;
+      }
     }
     return json;
   }

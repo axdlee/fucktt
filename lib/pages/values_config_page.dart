@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../services/data_backup_service.dart';
 import '../providers/values_provider.dart';
 import '../models/value_template_model.dart';
 import '../constants/app_constants.dart';
@@ -206,7 +207,7 @@ class _ValuesConfigPageState extends State<ValuesConfigPage>
                       });
                     },
                     backgroundColor: Colors.white,
-                    selectedColor: AppConstants.primaryColor.withOpacity(0.1),
+                    selectedColor: AppConstants.primaryColor.withValues(alpha: 0.1),
                     checkmarkColor: AppConstants.primaryColor,
                   ),
                 );
@@ -359,7 +360,7 @@ class _ValuesConfigPageState extends State<ValuesConfigPage>
           _buildReportItem('自定义模板', '${report['customTemplates']}'),
           _buildReportItem('覆盖分类', '${report['categories']}'),
           
-          if (report['lastUpdated'] != null) ..[
+          if (report['lastUpdated'] != null) ...[
             SizedBox(height: 8.h),
             Text(
               '最后更新: ${_formatDateTime(report['lastUpdated'])}',
@@ -501,7 +502,7 @@ class _ValuesConfigPageState extends State<ValuesConfigPage>
                 ),
                 deleteIcon: Icon(Icons.close, size: 14.sp),
                 onDeleted: () => onRemove(keyword),
-                backgroundColor: color.withOpacity(0.1),
+                backgroundColor: color.withValues(alpha: 0.1),
                 deleteIconColor: color,
               );
             }).toList(),
@@ -595,18 +596,10 @@ class _ValuesConfigPageState extends State<ValuesConfigPage>
 
   /// 编辑模板
   void _editTemplate(ValueTemplateModel template) {
-    // TODO: 实现编辑模板对话框
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('编辑价值观'),
-        content: const Text('编辑功能开发中...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('确定'),
-          ),
-        ],
+      builder: (context) => AddValueDialog(
+        editTemplate: template,
       ),
     );
   }
@@ -711,19 +704,121 @@ class _ValuesConfigPageState extends State<ValuesConfigPage>
   }
 
   /// 导出价值观配置
-  void _exportValues(ValuesProvider valuesProvider) {
-    // TODO: 实现导出功能
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('导出功能开发中...')),
-    );
+  void _exportValues(ValuesProvider valuesProvider) async {
+    try {
+      final exportData = {
+        'version': '1.0.0',
+        'exportTime': DateTime.now().toIso8601String(),
+        'templates': valuesProvider.templates.map((t) => t.toJson()).toList(),
+        'userProfile': valuesProvider.userProfile?.toJson(),
+      };
+      
+      // 使用数据备份服务导出
+      final backupService = DataBackupService.instance;
+      await backupService.exportBackup(
+        data: exportData,
+        filename: 'values_config_${DateTime.now().millisecondsSinceEpoch}.json',
+      );
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('价值观配置导出成功'),
+            backgroundColor: AppConstants.successColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('导出失败：$e'),
+            backgroundColor: AppConstants.errorColor,
+          ),
+        );
+      }
+    }
   }
 
   /// 导入价值观配置
-  void _importValues(ValuesProvider valuesProvider) {
-    // TODO: 实现导入功能
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('导入功能开发中...')),
-    );
+  void _importValues(ValuesProvider valuesProvider) async {
+    try {
+      // 显示文件选择对话框
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('导入配置'),
+          content: const Text('请选择要导入的配置文件。导入后将覆盖现有配置。'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () async {
+                Navigator.pop(context);
+                await _performImport(valuesProvider);
+              },
+              child: const Text('选择文件'),
+            ),
+          ],
+        ),
+      );
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('导入失败：$e'),
+            backgroundColor: AppConstants.errorColor,
+          ),
+        );
+      }
+    }
+  }
+  
+  Future<void> _performImport(ValuesProvider valuesProvider) async {
+    try {
+      // 使用数据备份服务导入
+      final backupService = DataBackupService.instance;
+      final backupFiles = await backupService.getBackupFiles();
+      
+      if (backupFiles.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('没有找到备份文件'),
+            backgroundColor: AppConstants.warningColor,
+          ),
+        );
+        return;
+      }
+      
+      // 选择最新的备份文件
+      final latestBackup = backupFiles.first;
+      final backupData = await backupService.loadBackupData(latestBackup.filePath);
+      
+      // 导入数据
+      if (backupData.valueTemplates.isNotEmpty) {
+        await valuesProvider.importTemplates(backupData.valueTemplates);
+      }
+      
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('价值观配置导入成功'),
+            backgroundColor: AppConstants.successColor,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('导入失败：$e'),
+            backgroundColor: AppConstants.errorColor,
+          ),
+        );
+      }
+    }
   }
 
   /// 重置为默认
@@ -739,12 +834,31 @@ class _ValuesConfigPageState extends State<ValuesConfigPage>
             child: const Text('取消'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               Navigator.pop(context);
-              // TODO: 实现重置功能
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(content: Text('重置功能开发中...')),
-              );
+              
+              try {
+                final valuesProvider = context.read<ValuesProvider>();
+                await valuesProvider.resetToDefaults();
+                
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                      content: Text('已重置为默认设置'),
+                      backgroundColor: AppConstants.successColor,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('重置失败：$e'),
+                      backgroundColor: AppConstants.errorColor,
+                    ),
+                  );
+                }
+              }
             },
             child: const Text('重置'),
           ),

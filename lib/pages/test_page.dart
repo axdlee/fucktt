@@ -133,7 +133,7 @@ class _TestPageState extends State<TestPage>
         borderRadius: BorderRadius.circular(AppSizes.borderRadius),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 8,
             offset: const Offset(0, 2),
           ),
@@ -221,9 +221,9 @@ class _TestPageState extends State<TestPage>
     return Container(
       padding: const EdgeInsets.all(AppSizes.padding),
       decoration: BoxDecoration(
-        color: statusColor.withOpacity(0.1),
+        color: statusColor.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppSizes.borderRadius),
-        border: Border.all(color: statusColor.withOpacity(0.3)),
+        border: Border.all(color: statusColor.withValues(alpha: 0.3)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -257,7 +257,7 @@ class _TestPageState extends State<TestPage>
           
           LinearProgressIndicator(
             value: successRate,
-            backgroundColor: Colors.grey.withOpacity(0.3),
+            backgroundColor: Colors.grey.withValues(alpha: 0.3),
             valueColor: AlwaysStoppedAnimation<Color>(statusColor),
           ),
           
@@ -339,11 +339,11 @@ class _TestPageState extends State<TestPage>
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(AppSizes.borderRadius),
         border: Border.all(
-          color: color.withOpacity(0.3),
+          color: color.withValues(alpha: 0.3),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 4,
             offset: const Offset(0, 1),
           ),
@@ -369,7 +369,7 @@ class _TestPageState extends State<TestPage>
               margin: const EdgeInsets.all(AppSizes.padding),
               padding: const EdgeInsets.all(AppSizes.padding),
               decoration: BoxDecoration(
-                color: Colors.red.withOpacity(0.1),
+                color: Colors.red.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppSizes.borderRadius),
               ),
               child: Column(
@@ -399,7 +399,7 @@ class _TestPageState extends State<TestPage>
               margin: const EdgeInsets.all(AppSizes.padding),
               padding: const EdgeInsets.all(AppSizes.padding),
               decoration: BoxDecoration(
-                color: Colors.green.withOpacity(0.1),
+                color: Colors.green.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(AppSizes.borderRadius),
               ),
               child: Row(
@@ -450,8 +450,8 @@ class TestMenuItem extends StatelessWidget {
       child: ListTile(
         leading: CircleAvatar(
           backgroundColor: enabled 
-              ? AppColors.primary.withOpacity(0.1)
-              : Colors.grey.withOpacity(0.1),
+              ? AppColors.primary.withValues(alpha: 0.1)
+              : Colors.grey.withValues(alpha: 0.1),
           child: Icon(
             icon,
             color: enabled ? AppColors.primary : Colors.grey,

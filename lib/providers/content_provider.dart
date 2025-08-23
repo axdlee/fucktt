@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
+
 import '../models/behavior_model.dart';
+import '../models/ai_provider_model.dart';
 import '../services/behavior_log_service.dart';
 import '../services/ai_service_manager.dart';
 import '../services/storage_service.dart';
@@ -152,7 +155,9 @@ class ContentProvider extends ChangeNotifier {
         matchedKeywords: _extractKeywords(content, valuesProvider),
         recommendedAction: action,
         analyzedAt: DateTime.now(),
-        aiProviderId: aiProvider?.healthyProviders.firstOrNull?.id ?? '',
+        aiProviderId: aiProvider?.healthyProviders.isNotEmpty == true 
+            ? aiProvider!.healthyProviders.first.id 
+            : '',
         promptTemplateId: 'content_analysis',
         rawResponse: {},
       );

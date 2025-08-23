@@ -100,20 +100,22 @@ class AIServiceManager {
     // 执行请求，带重试机制
     for (int attempt = 0; attempt <= maxRetries; attempt++) {
       try {
-        final response = await service.chat(
+        final response = await service?.chat(
           prompt: prompt,
           modelId: modelId,
           parameters: parameters,
         );
         
-        if (response.success) {
-          return response;
+        if (response?.success == true) {
+          return response!;
         } else {
-          throw AIServiceException(response.errorMessage ?? '请求失败');
+          throw AIServiceException(response?.errorMessage ?? '请求失败');
         }
       } catch (e) {
         // 标记服务为不健康
-        _healthStatus[service.provider.id] = false;
+        if (service != null) {
+          _healthStatus[service.provider.id] = false;
+        }
         
         if (attempt == maxRetries) {
           rethrow;
@@ -159,7 +161,9 @@ class AIServiceManager {
       );
     } catch (e) {
       // 标记服务为不健康
-      _healthStatus[service.provider.id] = false;
+      if (service != null) {
+        _healthStatus[service.provider.id] = false;
+      }
       rethrow;
     }
   }

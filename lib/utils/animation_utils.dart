@@ -305,8 +305,8 @@ class AnimationUtils {
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(radius),
-        splashColor: rippleColor?.withOpacity(0.3),
-        highlightColor: rippleColor?.withOpacity(0.1),
+        splashColor: rippleColor?.withValues(alpha: 0.3),
+        highlightColor: rippleColor?.withValues(alpha: 0.1),
         child: child,
       ),
     );

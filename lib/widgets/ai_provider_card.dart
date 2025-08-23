@@ -66,7 +66,7 @@ class AIProviderCard extends StatelessWidget {
           width: 48.w,
           height: 48.w,
           decoration: BoxDecoration(
-            color: _getProviderColor().withOpacity(0.1),
+            color: _getProviderColor().withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(12.r),
           ),
           child: Icon(
@@ -102,7 +102,7 @@ class AIProviderCard extends StatelessWidget {
                   Container(
                     padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                     decoration: BoxDecoration(
-                      color: AppConstants.primaryColor.withOpacity(0.1),
+                      color: AppConstants.primaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
@@ -232,7 +232,7 @@ class AIProviderCard extends StatelessWidget {
       return Container(
         padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
-          color: AppConstants.warningColor.withOpacity(0.1),
+          color: AppConstants.warningColor.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8.r),
         ),
         child: Row(
@@ -276,7 +276,7 @@ class AIProviderCard extends StatelessWidget {
             return Container(
               padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               decoration: BoxDecoration(
-                color: AppConstants.primaryColor.withOpacity(0.1),
+                color: AppConstants.primaryColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12.r),
               ),
               child: Text(
@@ -342,7 +342,7 @@ class AIProviderCard extends StatelessWidget {
         
         // 更多操作
         PopupMenuButton<String>(
-          onSelected: _handleAction,
+          onSelected: (action) => _handleAction(context, action),
           icon: Icon(
             Icons.more_horiz,
             color: AppConstants.textSecondaryColor,
@@ -386,13 +386,13 @@ class AIProviderCard extends StatelessWidget {
   }
 
   /// 处理操作
-  void _handleAction(String action) {
+  void _handleAction(BuildContext context, String action) {
     switch (action) {
       case 'priority':
-        _showPriorityDialog();
+        _showPriorityDialog(context);
         break;
       case 'models':
-        _showModelsDialog();
+        _showModelsDialog(context);
         break;
       case 'delete':
         onDelete?.call();
@@ -401,13 +401,101 @@ class AIProviderCard extends StatelessWidget {
   }
 
   /// 显示优先级调整对话框
-  void _showPriorityDialog() {
-    // TODO: 实现优先级调整对话框
+  void _showPriorityDialog(BuildContext context) {
+    int currentPriority = provider.priority;
+    
+    showDialog(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) => AlertDialog(
+          title: const Text('调整优先级'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('当前优先级：$currentPriority'),
+              SizedBox(height: 16.h),
+              Slider(
+                value: currentPriority.toDouble(),
+                min: 1,
+                max: 10,
+                divisions: 9,
+                label: currentPriority.toString(),
+                onChanged: (value) {
+                  setState(() {
+                    currentPriority = value.toInt();
+                  });
+                },
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text('低优先级', style: TextStyle(fontSize: 12.sp)),
+                  Text('高优先级', style: TextStyle(fontSize: 12.sp)),
+                ],
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('取消'),
+            ),
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                onPriorityChanged?.call(currentPriority);
+              },
+              child: const Text('确定'),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   /// 显示模型列表对话框
-  void _showModelsDialog() {
-    // TODO: 实现模型列表对话框
+  void _showModelsDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('${provider.displayName} 支持的模型'),
+        content: SizedBox(
+          width: double.maxFinite,
+          child: ListView.builder(
+            shrinkWrap: true,
+            itemCount: provider.supportedModels.length,
+            itemBuilder: (context, index) {
+              final model = provider.supportedModels[index];
+              return ListTile(
+                leading: Icon(
+                  Icons.model_training,
+                  color: AppConstants.primaryColor,
+                  size: 20.sp,
+                ),
+                title: Text(
+                  model.displayName,
+                  style: TextStyle(fontSize: 14.sp),
+                ),
+                subtitle: Text(
+                  model.modelId,
+                  style: TextStyle(
+                    fontSize: 12.sp,
+                    color: AppConstants.textSecondaryColor,
+                  ),
+                ),
+                dense: true,
+              );
+            },
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('关闭'),
+          ),
+        ],
+      ),
+    );
   }
 
   /// 获取服务商图标

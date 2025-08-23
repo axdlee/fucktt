@@ -19,6 +19,64 @@ class DataBackupService {
   
   DataBackupService._();
   
+  /// 导出数据到指定文件
+  Future<String> exportBackup({
+    required Map<String, dynamic> data,
+    required String filename,
+    String? customPath,
+  }) async {
+    try {
+      final directory = customPath != null 
+          ? Directory(customPath)
+          : await getApplicationDocumentsDirectory();
+      
+      final file = File('${directory.path}/$filename');
+      
+      // 转换为JSON
+      final jsonString = const JsonEncoder.withIndent('  ').convert(data);
+      
+      // 写入文件
+      await file.writeAsString(jsonString);
+      
+      return file.path;
+    } catch (e) {
+      throw BackupException('导出备份失败: $e');
+    }
+  }
+  
+  /// 从文件加载备份数据
+  Future<BackupData> loadBackupData(String filePath) async {
+    try {
+      final file = File(filePath);
+      
+      if (!await file.exists()) {
+        throw BackupException('备份文件不存在');
+      }
+      
+      final jsonString = await file.readAsString();
+      final jsonData = jsonDecode(jsonString) as Map<String, dynamic>;
+      
+      // 如果不是标准的BackupData格式，转换为BackupData
+      if (!jsonData.containsKey('signature')) {
+        return BackupData(
+          version: jsonData['version'] ?? '1.0.0',
+          signature: _backupSignature,
+          timestamp: DateTime.parse(jsonData['exportTime'] ?? DateTime.now().toIso8601String()),
+          valueTemplates: (jsonData['templates'] as List? ?? [])
+              .map((t) => ValueTemplateModel.fromJson(t as Map<String, dynamic>))
+              .toList(),
+        );
+      }
+      
+      // 验证备份文件
+      _validateBackupData(jsonData);
+      
+      return BackupData.fromJson(jsonData);
+    } catch (e) {
+      throw BackupException('加载备份数据失败: $e');
+    }
+  }
+  
   /// 导出所有配置数据
   Future<BackupData> exportAllData() async {
     try {
@@ -35,7 +93,7 @@ class DataBackupService {
       final promptTemplates = StorageService.promptTemplateBox.values.toList();
       
       // 获取设置数据
-      final settings = StorageService.settingsBox.toMap();
+      final settings = Map<String, dynamic>.from(StorageService.settingsBox.toMap());
       
       // 创建备份数据
       final backupData = BackupData(
@@ -431,4 +489,4 @@ class BackupException implements Exception {
   
   @override
   String toString() => 'BackupException: $message';
-}"
+}

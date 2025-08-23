@@ -94,7 +94,8 @@ class OpenAICompatibleService implements AIService {
       );
       
       if (response.statusCode == 200 && response.data != null) {
-        await for (final chunk in response.data!.stream.transform(utf8.decoder)) {
+        final stream = response.data!.stream.map((event) => event as List<int>);
+        await for (final chunk in stream.transform(utf8.decoder)) {
           final lines = chunk.split('\n');
           for (final line in lines) {
             if (line.startsWith('data: ')) {

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:go_router/go_router.dart';
 import '../constants/app_constants.dart';
-import '../utils/animation_utils.dart';
 import '../services/performance_service.dart';
 import '../providers/app_provider.dart';
 import '../providers/ai_provider.dart';
@@ -29,7 +28,8 @@ class _SplashPageState extends State<SplashPage>
   late Animation<Offset> _textSlideAnimation;
   late Animation<double> _progressAnimation;
   
-  bool _isInitializing = true;
+  
+bool _isInitializing = true;
   String _currentTask = '正在启动应用...';
   double _progress = 0.0;
 
@@ -291,7 +291,7 @@ class _SplashPageState extends State<SplashPage>
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
-                        color: AppConstants.primaryColor.withOpacity(0.3),
+                        color: AppConstants.primaryColor.withValues(alpha: 0.3),
                         blurRadius: 20,
                         offset: const Offset(0, 10),
                       ),
@@ -378,7 +378,7 @@ class _SplashPageState extends State<SplashPage>
                 height: 4,
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(2),
-                  color: Colors.grey.withOpacity(0.2),
+                  color: Colors.grey.withValues(alpha: 0.2),
                 ),
                 child: FractionallySizedBox(
                   alignment: Alignment.centerLeft,

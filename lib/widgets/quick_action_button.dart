@@ -39,7 +39,7 @@ class QuickActionButton extends StatelessWidget {
             ),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.04),
+                color: Colors.black.withValues(alpha: 0.04),
                 offset: const Offset(0, 2),
                 blurRadius: 8,
               ),
@@ -52,7 +52,7 @@ class QuickActionButton extends StatelessWidget {
                 width: 48.w,
                 height: 48.w,
                 decoration: BoxDecoration(
-                  color: enabled ? color.withOpacity(0.1) : AppConstants.textTertiaryColor.withOpacity(0.1),
+                  color: enabled ? color.withValues(alpha: 0.1) : AppConstants.textTertiaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12.r),
                 ),
                 child: Icon(
@@ -136,7 +136,7 @@ class GridQuickActionButton extends StatelessWidget {
                     width: 40.w,
                     height: 40.w,
                     decoration: BoxDecoration(
-                      color: enabled ? color.withOpacity(0.1) : AppConstants.textTertiaryColor.withOpacity(0.1),
+                      color: enabled ? color.withValues(alpha: 0.1) : AppConstants.textTertiaryColor.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Icon(
@@ -212,7 +212,7 @@ class CircularQuickActionButton extends StatelessWidget {
                 shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
-                    color: (enabled ? color : AppConstants.textTertiaryColor).withOpacity(0.3),
+                    color: (enabled ? color : AppConstants.textTertiaryColor).withValues(alpha: 0.3),
                     offset: const Offset(0, 2),
                     blurRadius: 8,
                   ),
@@ -288,7 +288,7 @@ class HorizontalQuickActionButton extends StatelessWidget {
                 width: 40.w,
                 height: 40.w,
                 decoration: BoxDecoration(
-                  color: enabled ? color.withOpacity(0.1) : AppConstants.textTertiaryColor.withOpacity(0.1),
+                  color: enabled ? color.withValues(alpha: 0.1) : AppConstants.textTertiaryColor.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8.r),
                 ),
                 child: Icon(

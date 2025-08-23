@@ -277,6 +277,6 @@ class BehaviorLogService {
               'count': entry.value,
             })
         .toList()
-      ..sort((a, b) => a['date'].compareTo(b['date']));
+      ..sort((a, b) => (a['date'] as String).compareTo(b['date'] as String));
   }
 }

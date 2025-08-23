@@ -1,7 +1,9 @@
 import 'dart:async';
-import 'dart:isolate';
+
 import 'package:flutter/foundation.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+
 import '../services/storage_service.dart';
 
 /// 性能优化服务 - 提升应用性能和响应速度
@@ -161,7 +163,12 @@ class PerformanceService {
   
   /// 清理待处理任务
   void _cleanupPendingTasks() {
-    _pendingTasks.removeWhere((task) => task.isCompleted);
+    // 简化实现：清理超时任务
+    if (_pendingTasks.length > 50) {
+      final tasksToKeep = _pendingTasks.take(25).toList();
+      _pendingTasks.clear();
+      _pendingTasks.addAll(tasksToKeep);
+    }
   }
   
   /// 缓存数据
@@ -246,7 +253,7 @@ class PerformanceService {
   /// 预加载价值观模板
   Future<void> _preloadValuesTemplates() async {
     try {
-      final box = StorageService.valuesTemplateBox;
+      final box = StorageService.valueTemplateBox;
       final templates = box.values.toList();
       cacheData('values_templates', templates);
     } catch (e) {

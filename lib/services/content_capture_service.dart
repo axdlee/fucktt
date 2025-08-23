@@ -248,4 +248,4 @@ class CapturedContent {
       'metadata': metadata,
     };
   }
-}"
+}

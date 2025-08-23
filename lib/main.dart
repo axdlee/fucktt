@@ -105,7 +105,7 @@ class ValueFilterApp extends StatelessWidget {
       ),
       
       // 卡片主题
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         elevation: 2,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12.r),

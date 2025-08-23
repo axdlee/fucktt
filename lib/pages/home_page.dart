@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 
+import '../models/behavior_model.dart';
+import '../models/ai_provider_model.dart';
 import '../providers/app_provider.dart';
 import '../providers/ai_provider.dart';
 import '../providers/values_provider.dart';
@@ -297,7 +299,7 @@ class _HomePageState extends State<HomePage> {
             
             Expanded(
               child: QuickActionButton(
-                icon: Icons.smart_toy_outline,
+                icon: Icons.smart_toy,
                 title: 'AI配置',
                 subtitle: '管理AI服务',
                 color: AppConstants.secondaryColor,
@@ -468,7 +470,7 @@ class _HomePageState extends State<HomePage> {
             width: 40.w,
             height: 40.w,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
+              color: color.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(icon, color: color, size: 20.sp),

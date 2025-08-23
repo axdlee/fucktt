@@ -1,6 +1,14 @@
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
-import '../models/user_config_model.dart';
+
+/// 权限类型枚举
+enum PermissionType {
+  accessibility,    // 无障碍服务
+  overlay,         // 悬浮窗
+  storage,         // 存储
+  camera,          // 摄像头
+  notification,    // 通知
+}
 
 /// 权限管理服务
 class PermissionService {
@@ -238,4 +246,4 @@ class PermissionService {
     
     return true;
   }
-}"
+}

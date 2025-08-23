@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../models/ai_provider_model.dart';
 import '../providers/ai_provider.dart';
 import '../constants/app_constants.dart';
 
 /// 添加AI服务提供商对话框
 class AddAIProviderDialog extends StatefulWidget {
-  const AddAIProviderDialog({super.key});
+  final AIProviderModel? editProvider; // 编辑模式下的提供商
+  
+  const AddAIProviderDialog({super.key, this.editProvider});
 
   @override
   State<AddAIProviderDialog> createState() => _AddAIProviderDialogState();
@@ -23,11 +27,27 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
   String _selectedProvider = 'openai';
   int _priority = 1;
   bool _isTesting = false;
+  bool _isPasswordVisible = false;
+  bool get _isEditMode => widget.editProvider != null;
 
   @override
   void initState() {
     super.initState();
-    _updateProviderDefaults();
+    if (_isEditMode) {
+      _initForEdit();
+    } else {
+      _updateProviderDefaults();
+    }
+  }
+  
+  void _initForEdit() {
+    final provider = widget.editProvider!;
+    _nameController.text = provider.displayName;
+    _apiKeyController.text = provider.apiKey;
+    _baseUrlController.text = provider.baseUrl;
+    _descriptionController.text = provider.description ?? '';
+    _selectedProvider = provider.name.toLowerCase();
+    _priority = provider.priority;
   }
 
   @override
@@ -86,7 +106,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                         controller: _apiKeyController,
                         label: 'API密钥',
                         hint: '请输入您的API密钥',
-                        obscureText: true,
+                        obscureText: !_isPasswordVisible,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
                             return '请输入API密钥';
@@ -106,7 +126,8 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                           if (value == null || value.trim().isEmpty) {
                             return '请输入基础URL';
                           }
-                          if (!Uri.tryParse(value)?.isAbsolute == true) {
+                          final parsedUri = Uri.tryParse(value);
+                          if (parsedUri == null || !parsedUri.isAbsolute) {
                             return '请输入有效的URL地址';
                           }
                           return null;
@@ -163,7 +184,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
           ),
           SizedBox(width: 8.w),
           Text(
-            '添加AI服务',
+            _isEditMode ? '编辑AI服务' : '添加AI服务',
             style: TextStyle(
               fontSize: 18.sp,
               fontWeight: FontWeight.w600,
@@ -284,9 +305,14 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
             suffixIcon: obscureText 
                 ? IconButton(
-                    icon: const Icon(Icons.visibility_outlined),
+                    icon: Icon(
+                      _isPasswordVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      size: 20.sp,
+                    ),
                     onPressed: () {
-                      // TODO: 实现密码可见性切换
+                      setState(() {
+                        _isPasswordVisible = !_isPasswordVisible;
+                      });
                     },
                   )
                 : null,
@@ -328,9 +354,9 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             activeTrackColor: AppConstants.primaryColor,
-            inactiveTrackColor: AppConstants.primaryColor.withOpacity(0.2),
+            inactiveTrackColor: AppConstants.primaryColor.withValues(alpha: 0.2),
             thumbColor: AppConstants.primaryColor,
-            overlayColor: AppConstants.primaryColor.withOpacity(0.1),
+            overlayColor: AppConstants.primaryColor.withValues(alpha: 0.1),
             trackHeight: 4.h,
             thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10.r),
           ),
@@ -599,34 +625,52 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     final aiProvider = context.read<AIProvider>();
     
     try {
-      // 创建AI服务提供商
-      final provider = _selectedProvider == 'openai'
-          ? aiProvider.createOpenAIProvider(
-              apiKey: _apiKeyController.text.trim(),
-              baseUrl: _baseUrlController.text.trim(),
-            )
-          : aiProvider.createDeepSeekProvider(
-              apiKey: _apiKeyController.text.trim(),
-              baseUrl: _baseUrlController.text.trim(),
-            );
+      AIProviderModel provider;
       
-      // 设置自定义配置
-      final updatedProvider = provider.copyWith(
-        displayName: _nameController.text.trim(),
-        description: _descriptionController.text.trim().isEmpty 
-            ? null 
-            : _descriptionController.text.trim(),
-        priority: _priority,
-      );
-      
-      // 添加到Provider
-      await aiProvider.addProvider(updatedProvider);
+      if (_isEditMode) {
+        // 编辑模式：更新现有提供商
+        provider = widget.editProvider!.copyWith(
+          displayName: _nameController.text.trim(),
+          apiKey: _apiKeyController.text.trim(),
+          baseUrl: _baseUrlController.text.trim(),
+          description: _descriptionController.text.trim().isEmpty 
+              ? null 
+              : _descriptionController.text.trim(),
+          priority: _priority,
+        );
+        
+        await aiProvider.updateProvider(provider);
+      } else {
+        // 新增模式：创建新的提供商
+        provider = _selectedProvider == 'openai'
+            ? aiProvider.createOpenAIProvider(
+                apiKey: _apiKeyController.text.trim(),
+                baseUrl: _baseUrlController.text.trim(),
+              )
+            : aiProvider.createDeepSeekProvider(
+                apiKey: _apiKeyController.text.trim(),
+                baseUrl: _baseUrlController.text.trim(),
+              );
+        
+        // 设置自定义配置
+        final updatedProvider = provider.copyWith(
+          displayName: _nameController.text.trim(),
+          description: _descriptionController.text.trim().isEmpty 
+              ? null 
+              : _descriptionController.text.trim(),
+          priority: _priority,
+        );
+        
+        // 添加到Provider
+        await aiProvider.addProvider(updatedProvider);
+        provider = updatedProvider;
+      }
       
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('AI服务\"${updatedProvider.displayName}\"添加成功'),
+            content: Text('AI服务\"${provider.displayName}\"${_isEditMode ? "更新" : "添加"}成功'),
             backgroundColor: AppConstants.successColor,
           ),
         );
@@ -635,7 +679,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('添加失败：$e'),
+            content: Text('${_isEditMode ? "更新" : "添加"}失败：$e'),
             backgroundColor: AppConstants.errorColor,
           ),
         );

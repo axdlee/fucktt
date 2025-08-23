@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
+import '../models/value_template_model.dart';
 import '../providers/values_provider.dart';
 import '../constants/app_constants.dart';
 
 /// 添加价值观对话框
 class AddValueDialog extends StatefulWidget {
-  const AddValueDialog({super.key});
+  final ValueTemplateModel? editTemplate; // 编辑模式下的模板
+  
+  const AddValueDialog({super.key, this.editTemplate});
 
   @override
   State<AddValueDialog> createState() => _AddValueDialogState();
@@ -22,6 +25,25 @@ class _AddValueDialogState extends State<AddValueDialog> {
   
   String _selectedCategory = AppConstants.valueCategories.first;
   double _weight = 0.5;
+  bool get _isEditMode => widget.editTemplate != null;
+
+  @override
+  void initState() {
+    super.initState();
+    if (_isEditMode) {
+      _initForEdit();
+    }
+  }
+  
+  void _initForEdit() {
+    final template = widget.editTemplate!;
+    _nameController.text = template.name;
+    _descriptionController.text = template.description;
+    _keywordsController.text = template.keywords.join(',');
+    _negativeKeywordsController.text = template.negativeKeywords.join(',');
+    _selectedCategory = template.category;
+    _weight = template.weight;
+  }
 
   @override
   void dispose() {
@@ -61,7 +83,7 @@ class _AddValueDialogState extends State<AddValueDialog> {
                   ),
                   SizedBox(width: 8.w),
                   Text(
-                    '创建新的价值观',
+                    _isEditMode ? '编辑价值观' : '创建新的价值观',
                     style: TextStyle(
                       fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
@@ -287,9 +309,9 @@ class _AddValueDialogState extends State<AddValueDialog> {
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             activeTrackColor: AppConstants.primaryColor,
-            inactiveTrackColor: AppConstants.primaryColor.withOpacity(0.2),
+            inactiveTrackColor: AppConstants.primaryColor.withValues(alpha: 0.2),
             thumbColor: AppConstants.primaryColor,
-            overlayColor: AppConstants.primaryColor.withOpacity(0.1),
+            overlayColor: AppConstants.primaryColor.withValues(alpha: 0.1),
             trackHeight: 4.h,
             thumbShape: RoundSliderThumbShape(enabledThumbRadius: 10.r),
           ),

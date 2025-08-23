@@ -187,7 +187,7 @@ class _AIConfigPageState extends State<AIConfigPage>
               });
             },
             backgroundColor: Colors.white,
-            selectedColor: AppConstants.primaryColor.withOpacity(0.1),
+            selectedColor: AppConstants.primaryColor.withValues(alpha: 0.1),
             checkmarkColor: AppConstants.primaryColor,
           ),
         ],
@@ -375,7 +375,7 @@ class _AIConfigPageState extends State<AIConfigPage>
             value: statistics['totalServices'] > 0 
                 ? statistics['healthyServices'] / statistics['totalServices']
                 : 0.0,
-            backgroundColor: AppConstants.errorColor.withOpacity(0.2),
+            backgroundColor: AppConstants.errorColor.withValues(alpha: 0.2),
             valueColor: AlwaysStoppedAnimation<Color>(AppConstants.successColor),
           ),
           
@@ -521,7 +521,7 @@ class _AIConfigPageState extends State<AIConfigPage>
           Container(
             padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
             decoration: BoxDecoration(
-              color: AppConstants.primaryColor.withOpacity(0.1),
+              color: AppConstants.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12.r),
             ),
             child: Text(
@@ -629,18 +629,10 @@ class _AIConfigPageState extends State<AIConfigPage>
 
   /// 编辑服务
   void _editProvider(AIProviderModel provider) {
-    // TODO: 实现编辑对话框
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('编辑AI服务'),
-        content: const Text('编辑功能开发中...'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('确定'),
-          ),
-        ],
+      builder: (context) => AddAIProviderDialog(
+        editProvider: provider,
       ),
     );
   }

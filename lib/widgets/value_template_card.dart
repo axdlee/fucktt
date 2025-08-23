@@ -118,7 +118,7 @@ class ValueTemplateCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(
           color: template.enabled 
-              ? AppConstants.primaryColor.withOpacity(0.2)
+              ? AppConstants.primaryColor.withValues(alpha: 0.2)
               : AppConstants.dividerColor,
         ),
       ),
@@ -254,7 +254,7 @@ class ValueTemplateCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
       decoration: BoxDecoration(
-        color: _getCategoryColor().withOpacity(0.1),
+        color: _getCategoryColor().withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12.r),
       ),
       child: Text(
@@ -295,8 +295,8 @@ class ValueTemplateCard extends StatelessWidget {
           padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
           decoration: BoxDecoration(
             color: isPositive 
-                ? AppConstants.successColor.withOpacity(0.1)
-                : AppConstants.errorColor.withOpacity(0.1),
+                ? AppConstants.successColor.withValues(alpha: 0.1)
+                : AppConstants.errorColor.withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: Text(
@@ -341,21 +341,23 @@ class ValueTemplateCard extends StatelessWidget {
         
         SizedBox(height: 4.h),
         
-        SliderTheme(
-          data: SliderTheme.of(context as BuildContext).copyWith(
-            activeTrackColor: AppConstants.primaryColor,
-            inactiveTrackColor: AppConstants.primaryColor.withOpacity(0.2),
-            thumbColor: AppConstants.primaryColor,
-            overlayColor: AppConstants.primaryColor.withOpacity(0.1),
-            trackHeight: 4.h,
-            thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.r),
-          ),
-          child: Slider(
-            value: template.weight,
-            min: 0.0,
-            max: 1.0,
-            divisions: 10,
-            onChanged: onWeightChanged,
+        Builder(
+          builder: (context) => SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              activeTrackColor: AppConstants.primaryColor,
+              inactiveTrackColor: AppConstants.primaryColor.withValues(alpha: 0.2),
+              thumbColor: AppConstants.primaryColor,
+              overlayColor: AppConstants.primaryColor.withValues(alpha: 0.1),
+              trackHeight: 4.h,
+              thumbShape: RoundSliderThumbShape(enabledThumbRadius: 8.r),
+            ),
+            child: Slider(
+              value: template.weight,
+              min: 0.0,
+              max: 1.0,
+              divisions: 10,
+              onChanged: onWeightChanged,
+            ),
           ),
         ),
       ],

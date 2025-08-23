@@ -357,4 +357,4 @@ extension MarkTypeExtension on MarkType {
         return BehaviorType.share;
     }
   }
-}"
+}

@@ -389,6 +389,67 @@ class ValuesProvider extends ChangeNotifier {
     };
   }
 
+  /// 导入价值观模板列表
+  Future<void> importTemplates(List<ValueTemplateModel> templates) async {
+    _setLoading(true);
+    
+    try {
+      final box = StorageService.valueTemplateBox;
+      
+      for (final template in templates) {
+        await box.put(template.id, template);
+      }
+      
+      await _loadTemplates();
+      _clearError();
+      notifyListeners();
+    } catch (e) {
+      _setError('导入价值观模板失败: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+  
+  /// 重置为默认设置
+  Future<void> resetToDefaults() async {
+    _setLoading(true);
+    
+    try {
+      final box = StorageService.valueTemplateBox;
+      
+      // 清除所有自定义模板
+      final keysToDelete = <String>[];
+      for (final template in _templates) {
+        if (template.isCustom) {
+          keysToDelete.add(template.id);
+        }
+      }
+      
+      for (final key in keysToDelete) {
+        await box.delete(key);
+      }
+      
+      // 重置用户档案
+      _userProfile = UserValuesProfile(
+        userId: 'default_user',
+        templateWeights: {},
+        blacklist: [],
+        whitelist: [],
+        customCategories: {},
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      );
+      
+      await _loadTemplates();
+      _clearError();
+      notifyListeners();
+    } catch (e) {
+      _setError('重置设置失败: $e');
+    } finally {
+      _setLoading(false);
+    }
+  }
+  
   /// 导入价值观配置
   Future<bool> importValues(Map<String, dynamic> data) async {
     _setLoading(true);
