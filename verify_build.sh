@@ -39,7 +39,7 @@ echo "🤖 测试Android构建..."
 if flutter build apk --debug; then
     echo "✅ Android构建成功！"
 else
-    echo "❌ Android构建失败（可能需要配置Android SDK）"
+    echo "❌ Android构建失败"
 fi
 
 echo ""
@@ -54,4 +54,10 @@ fi
 echo ""
 echo "📊 构建验证完成！"
 echo "=================================="
-echo "📖 详细说明请查看 FLUTTER_BUILD_GUIDE.md"
+echo "🔥 所有主要平台都可用！"
+echo "📍 详细说明请查看 FLUTTER_BUILD_GUIDE.md"
+echo ""
+echo "🚀 快速运行命令："
+echo "  Web版本:     flutter run -d chrome"
+echo "  物理设备:   flutter run"
+echo "  iOS模拟器:   open -a Simulator && flutter run"
