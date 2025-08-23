@@ -397,9 +397,26 @@ class ErrorHandlingService {
     return 'error_${DateTime.now().millisecondsSinceEpoch}';
   }
 
+  /// 检查存储服务是否可用
+  bool _isStorageAvailable() {
+    try {
+      final box = StorageService.settingsBox;
+      return box.isOpen;
+    } catch (e) {
+      return false;
+    }
+  }
+
   /// 保存错误到本地存储
   Future<void> _saveErrorToStorage(AppError error) async {
     try {
+      if (!_isStorageAvailable()) {
+        if (kDebugMode) {
+          print('💾 存储服务不可用，跳过错误日志保存');
+        }
+        return;
+      }
+      
       final box = StorageService.settingsBox;
       final existingLogs = box.get(storageKey, defaultValue: <String>[]) as List;
       existingLogs.add(error.toJson().toString());
@@ -420,6 +437,13 @@ class ErrorHandlingService {
   /// 加载历史错误日志
   Future<void> _loadErrorHistory() async {
     try {
+      if (!_isStorageAvailable()) {
+        if (kDebugMode) {
+          print('💾 存储服务不可用，跳过加载错误历史');
+        }
+        return;
+      }
+      
       final box = StorageService.settingsBox;
       final logs = box.get(storageKey, defaultValue: <String>[]) as List;
       
@@ -436,6 +460,13 @@ class ErrorHandlingService {
   /// 保存错误历史
   Future<void> _saveErrorHistory() async {
     try {
+      if (!_isStorageAvailable()) {
+        if (kDebugMode) {
+          print('💾 存储服务不可用，跳过保存错误历史');
+        }
+        return;
+      }
+      
       final logs = _errorHistory.map((error) => error.toJson().toString()).toList();
       final box = StorageService.settingsBox;
       await box.put(storageKey, logs);

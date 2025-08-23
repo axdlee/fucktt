@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -20,15 +21,19 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // 初始化错误处理服务
-    await ErrorHandlingService().initialize();
-    
-    // 初始化安全服务
-    await SecurityService().initialize();
-    
-    // 初始化Hive本地存储
-    await Hive.initFlutter();
+    // 首先初始化Hive本地存储（优先级最高）
+    if (kIsWeb) {
+      // Web环境下的Hive初始化
+      await Hive.initFlutter('value_filter_web');
+    } else {
+      // 移动端环境下的Hive初始化
+      await Hive.initFlutter();
+    }
     await StorageService.init();
+    
+    // 初始化其他服务（依赖存储服务）
+    await ErrorHandlingService().initialize();
+    await SecurityService().initialize();
     
     // 初始化性能服务
     final performanceService = PerformanceService();

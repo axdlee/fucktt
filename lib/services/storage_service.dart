@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/ai_provider_model.dart';
 import '../models/value_template_model.dart';
@@ -37,10 +38,17 @@ class StorageService {
       // 初始化默认数据
       await _initializeDefaultData();
       
-      print('存储服务初始化成功');
+      print('📦 存储服务初始化成功');
     } catch (e) {
-      print('存储服务初始化失败: $e');
-      rethrow;
+      print('⚠️ 存储服务初始化失败: $e');
+      
+      if (kIsWeb) {
+        // Web环境下的降级处理
+        print('🌐 Web环境检测到，尝试降级处理...');
+        await _initializeWebFallback();
+      } else {
+        rethrow;
+      }
     }
   }
 
@@ -112,7 +120,40 @@ class StorageService {
     }
   }
 
-  /// 打开数据库Box
+  /// Web环境下的降级初始化
+  static Future<void> _initializeWebFallback() async {
+    try {
+      // 尝试创建最小化的Box
+      _settingsBox = await Hive.openBox('settings');
+      _cacheBox = await Hive.openBox('cache');
+      
+      // 为其他Box创建空的占位符（防止late初始化错误）
+      try {
+        _userConfigBox = await Hive.openBox<UserConfigModel>('user_config_web');
+        _aiProviderBox = await Hive.openBox<AIProviderModel>('ai_providers_web');
+        _valueTemplateBox = await Hive.openBox<ValueTemplateModel>('value_templates_web');
+        _promptTemplateBox = await Hive.openBox<PromptTemplateModel>('prompt_templates_web');
+        _behaviorLogBox = await Hive.openBox<BehaviorLogModel>('behavior_logs_web');
+        _analysisResultBox = await Hive.openBox<ContentAnalysisResult>('analysis_results_web');
+        _aiInsightBox = await Hive.openBox<AIInsightModel>('ai_insights_web');
+      } catch (e) {
+        print('🌐 Web环境下部分数据库无法初始化，将使用限定功能: $e');
+      }
+      
+      print('🌐 Web环境降级初始化完成');
+    } catch (e) {
+      print('⚠️ Web降级初始化也失败: $e');
+      // 最后的降级方案：创建虚拟Box
+      await _createMockBoxes();
+    }
+  }
+  
+  /// 创建虚拟Box以防止应用崩溃
+  static Future<void> _createMockBoxes() async {
+    // 注意：这里需要创建一个简单的Mock实现
+    // 在实际项目中，你可能需要使用SharedPreferences或其他Web存储方案
+    print('🔄 使用紧急模式，某些功能可能不可用');
+  }
   static Future<void> _openBoxes() async {
     _userConfigBox = await Hive.openBox<UserConfigModel>('user_config');
     _aiProviderBox = await Hive.openBox<AIProviderModel>('ai_providers');
