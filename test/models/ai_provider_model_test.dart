@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fucktt/models/ai_provider_model.dart';
+import 'package:value_filter/models/ai_provider_model.dart';
 
 void main() {
   group('AIProviderModel Tests', () {

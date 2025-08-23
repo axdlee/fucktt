@@ -25,3 +25,4 @@
 .rustup-toolchain-installer-cache-lock/
 .rustup-toolchain-installer-cache-lock-file/
 .rustup-toolchain-installer-cache-lock-file-lock/
+build/

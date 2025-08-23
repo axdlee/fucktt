@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fucktt/models/value_template_model.dart';
+import 'package:value_filter/models/value_template_model.dart';
 
 void main() {
   group('ValueTemplateModel Tests', () {
