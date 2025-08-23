@@ -161,10 +161,8 @@ class AIServiceManager {
       );
     } catch (e) {
       // 标记服务为不健康
-      if (service != null) {
-        _healthStatus[service.provider.id] = false;
-      }
-      rethrow;
+      _healthStatus[service.provider.id] = false;
+          rethrow;
     }
   }
 

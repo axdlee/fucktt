@@ -341,45 +341,47 @@ class AIProviderCard extends StatelessWidget {
         SizedBox(width: 8.w),
         
         // 更多操作
-        PopupMenuButton<String>(
-          onSelected: (action) => _handleAction(context, action),
-          icon: Icon(
-            Icons.more_horiz,
-            color: AppConstants.textSecondaryColor,
-            size: 20.sp,
+        Builder(
+          builder: (context) => PopupMenuButton<String>(
+            onSelected: (action) => _handleAction(context, action),
+            icon: Icon(
+              Icons.more_horiz,
+              color: AppConstants.textSecondaryColor,
+              size: 20.sp,
+            ),
+            itemBuilder: (context) => [
+              const PopupMenuItem(
+                value: 'priority',
+                child: Row(
+                  children: [
+                    Icon(Icons.low_priority),
+                    SizedBox(width: 8),
+                    Text('调整优先级'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'models',
+                child: Row(
+                  children: [
+                    Icon(Icons.model_training),
+                    SizedBox(width: 8),
+                    Text('查看模型'),
+                  ],
+                ),
+              ),
+              const PopupMenuItem(
+                value: 'delete',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, color: Colors.red),
+                    SizedBox(width: 8),
+                    Text('删除', style: TextStyle(color: Colors.red)),
+                  ],
+                ),
+              ),
+            ],
           ),
-          itemBuilder: (context) => [
-            const PopupMenuItem(
-              value: 'priority',
-              child: Row(
-                children: [
-                  Icon(Icons.low_priority),
-                  SizedBox(width: 8),
-                  Text('调整优先级'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'models',
-              child: Row(
-                children: [
-                  Icon(Icons.model_training),
-                  SizedBox(width: 8),
-                  Text('查看模型'),
-                ],
-              ),
-            ),
-            const PopupMenuItem(
-              value: 'delete',
-              child: Row(
-                children: [
-                  Icon(Icons.delete_outline, color: Colors.red),
-                  SizedBox(width: 8),
-                  Text('删除', style: TextStyle(color: Colors.red)),
-                ],
-              ),
-            ),
-          ],
         ),
       ],
     );

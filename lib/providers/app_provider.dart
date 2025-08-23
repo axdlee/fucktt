@@ -156,7 +156,7 @@ class AppProvider extends ChangeNotifier {
   Future<void> setPrimaryColor(Color color) async {
     final currentSettings = appSettings;
     final newSettings = currentSettings.copyWith(
-      primaryColor: '#${color.value.toRadixString(16).padLeft(8, '0').substring(2)}',
+      primaryColor: '#${color.toARGB32().toRadixString(16).padLeft(8, '0').substring(2)}',
     );
     await updateAppSettings(newSettings);
   }

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:value_filter/services/ai_service_manager.dart';
 import 'package:value_filter/services/ai_service_interface.dart';
 import 'package:value_filter/models/ai_provider_model.dart';
+import 'package:value_filter/models/prompt_template_model.dart';
 import '../test_helper.dart';
 
 void main() {
@@ -127,6 +128,7 @@ void main() {
     });
 
     test('should handle provider selection for tasks', () {
+      // 使用正确的PromptFunction枚举
       final service = manager.selectServiceForTask(PromptFunction.contentAnalysis);
       expect(service, isNull); // 没有可用服务时应该返回null
     });
@@ -194,13 +196,4 @@ void main() {
       expect(true, isTrue); // 简化验证
     });
   });
-}
-
-/// 扩展的提示功能枚举
-enum PromptFunction {
-  contentAnalysis,
-  sentimentAnalysis,
-  summarization,
-  translation,
-  questionAnswering,
 }

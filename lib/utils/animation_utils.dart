@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:animations/animations.dart';
+import 'package:vector_math/vector_math_64.dart' hide Colors;
 
 /// UI动画工具类 - 提供流畅的动画效果
 class AnimationUtils {
@@ -204,14 +205,14 @@ class AnimationUtils {
     Duration baseDelay = const Duration(milliseconds: 100),
     Duration duration = defaultDuration,
   }) {
-    final delay = baseDelay * index;
+    final scaleValue = 0.95 + (index * 0.01);
     
     return AnimatedContainer(
       duration: duration,
       curve: Curves.easeOutBack,
       transform: Matrix4.identity()
-        ..translate(0.0, index * 10.0)
-        ..scale(0.95 + (index * 0.01)),
+        ..translateByVector3(Vector3(0.0, index * 10.0, 0.0))
+        ..scaleByDouble(scaleValue, scaleValue, 1.0, 1.0),
       child: child,
     );
   }

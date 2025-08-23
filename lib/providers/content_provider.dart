@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 
 import '../models/behavior_model.dart';
-import '../models/ai_provider_model.dart';
 import '../services/behavior_log_service.dart';
 import '../services/ai_service_manager.dart';
 import '../services/storage_service.dart';
@@ -263,7 +262,6 @@ $userValues
       final jsonEnd = response.lastIndexOf('}') + 1;
       
       if (jsonStart >= 0 && jsonEnd > jsonStart) {
-        final jsonStr = response.substring(jsonStart, jsonEnd);
         // 这里需要实际的JSON解析，目前简化处理
         return {
           'overallScore': 0.7,
@@ -429,8 +427,4 @@ $userValues
   void dispose() {
     super.dispose();
   }
-}
-
-extension on List<AIProviderModel> {
-  AIProviderModel? get firstOrNull => isEmpty ? null : first;
 }

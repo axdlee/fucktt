@@ -28,8 +28,7 @@ class _SplashPageState extends State<SplashPage>
   late Animation<Offset> _textSlideAnimation;
   late Animation<double> _progressAnimation;
   
-  
-bool _isInitializing = true;
+  bool _isInitializing = true;
   String _currentTask = '正在启动应用...';
   double _progress = 0.0;
 
