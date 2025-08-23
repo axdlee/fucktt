@@ -10,28 +10,61 @@ import 'providers/values_provider.dart';
 import 'providers/content_provider.dart';
 import 'services/storage_service.dart';
 import 'services/performance_service.dart';
+import 'services/error_handling_service.dart';
+import 'services/security_service.dart';
 import 'constants/app_constants.dart';
 import 'utils/app_router.dart';
 
 void main() async {
+  // 确保 Flutter 框架已初始化
   WidgetsFlutterBinding.ensureInitialized();
   
-  // 初始化Hive本地存储
-  await Hive.initFlutter();
-  await StorageService.init();
-  
-  // 初始化性能服务
-  await PerformanceService().initialize();
-  
-  // 设置系统状态栏样式
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark,
-    ),
-  );
-  
-  runApp(const ValueFilterApp());
+  try {
+    // 初始化错误处理服务
+    await ErrorHandlingService().initialize();
+    
+    // 初始化安全服务
+    await SecurityService().initialize();
+    
+    // 初始化Hive本地存储
+    await Hive.initFlutter();
+    await StorageService.init();
+    
+    // 初始化性能服务
+    final performanceService = PerformanceService();
+    await performanceService.initialize();
+    
+    // 预加载关键数据
+    await performanceService.preloadData();
+    
+    // 设置系统状态栏样式
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.dark,
+      ),
+    );
+    
+    // 运行应用
+    runApp(const ValueFilterApp());
+    
+  } catch (error, stackTrace) {
+    // 启动错误处理
+    final errorService = ErrorHandlingService();
+    errorService.recordError(
+      AppError(
+        id: 'startup_error_${DateTime.now().millisecondsSinceEpoch}',
+        type: ErrorType.system,
+        severity: ErrorSeverity.critical,
+        message: '应用启动失败: $error',
+        stackTrace: stackTrace,
+        context: {'phase': 'app_startup'},
+      ),
+    );
+    
+    // 在发布版本中，可以显示一个简单的错误页面
+    runApp(ErrorApp(error: error.toString()));
+  }
 }
 
 class ValueFilterApp extends StatelessWidget {
@@ -133,6 +166,91 @@ class ValueFilterApp extends StatelessWidget {
         brightness: Brightness.dark,
       ),
       fontFamily: 'PingFang',
+    );
+  }
+}
+
+/// 错误应用组件 - 当应用启动失败时显示
+class ErrorApp extends StatelessWidget {
+  final String error;
+  
+  const ErrorApp({super.key, required this.error});
+  
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: '价值观内容过滤器 - 错误',
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        backgroundColor: Colors.red.shade50,
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.error_outline,
+                  size: 80,
+                  color: Colors.red.shade600,
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  '应用启动失败',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red.shade800,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  '抱歉，应用在启动过程中遇到了问题。',
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.red.shade600,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: () {
+                    SystemNavigator.pop();
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red.shade600,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('退出应用'),
+                ),
+                const SizedBox(height: 16),
+                if (error.isNotEmpty)
+                  ExpansionTile(
+                    title: const Text('错误详情'),
+                    children: [
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(16),
+                        margin: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.grey.shade100,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Text(
+                          error,
+                          style: const TextStyle(
+                            fontFamily: 'monospace',
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

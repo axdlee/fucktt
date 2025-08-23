@@ -198,22 +198,59 @@ class PerformanceService {
   Future<void> preloadData() async {
     try {
       // 预加载用户配置
-      _addTask(_preloadUserConfig());
+      await _preloadUserConfig();
       
-      // 预加载AI服务配置
-      _addTask(_preloadAIProviders());
+      // 预加载AI提供商配置
+      await _preloadAIProviders();
       
       // 预加载价值观模板
-      _addTask(_preloadValuesTemplates());
-      
-      await Future.wait(_pendingTasks.take(3));
+      await _preloadValueTemplates();
       
       if (kDebugMode) {
-        print('📦 数据预加载完成');
+        print('🚀 数据预加载完成');
       }
     } catch (e) {
       if (kDebugMode) {
         print('❌ 数据预加载失败: $e');
+      }
+    }
+  }
+  
+  /// 预加载用户配置
+  Future<void> _preloadUserConfig() async {
+    const key = 'user_config';
+    if (getCachedData(key) == null) {
+      try {
+        final config = StorageService.settingsBox.toMap();
+        cacheData(key, config);
+      } catch (e) {
+        if (kDebugMode) print('预加载用户配置失败: $e');
+      }
+    }
+  }
+  
+  /// 预加载AI提供商
+  Future<void> _preloadAIProviders() async {
+    const key = 'ai_providers';
+    if (getCachedData(key) == null) {
+      try {
+        final providers = StorageService.aiProviderBox.values.toList();
+        cacheData(key, providers);
+      } catch (e) {
+        if (kDebugMode) print('预加载AI提供商失败: $e');
+      }
+    }
+  }
+  
+  /// 预加载价值观模板
+  Future<void> _preloadValueTemplates() async {
+    const key = 'value_templates';
+    if (getCachedData(key) == null) {
+      try {
+        final templates = StorageService.valueTemplateBox.values.toList();
+        cacheData(key, templates);
+      } catch (e) {
+        if (kDebugMode) print('预加载价值观模板失败: $e');
       }
     }
   }
@@ -223,47 +260,6 @@ class PerformanceService {
     _pendingTasks.add(task);
     task.whenComplete(() => _pendingTasks.remove(task));
   }
-  
-  /// 预加载用户配置
-  Future<void> _preloadUserConfig() async {
-    try {
-      final box = StorageService.userConfigBox;
-      final configs = box.values.toList();
-      cacheData('user_configs', configs);
-    } catch (e) {
-      if (kDebugMode) {
-        print('预加载用户配置失败: $e');
-      }
-    }
-  }
-  
-  /// 预加载AI服务商
-  Future<void> _preloadAIProviders() async {
-    try {
-      final box = StorageService.aiProviderBox;
-      final providers = box.values.toList();
-      cacheData('ai_providers', providers);
-    } catch (e) {
-      if (kDebugMode) {
-        print('预加载AI服务商失败: $e');
-      }
-    }
-  }
-  
-  /// 预加载价值观模板
-  Future<void> _preloadValuesTemplates() async {
-    try {
-      final box = StorageService.valueTemplateBox;
-      final templates = box.values.toList();
-      cacheData('values_templates', templates);
-    } catch (e) {
-      if (kDebugMode) {
-        print('预加载价值观模板失败: $e');
-      }
-    }
-  }
-  
-  /// 在隔离线程中执行耗时任务
   static Future<R> runInIsolate<T, R>(
     ComputeCallback<T, R> callback,
     T message,
