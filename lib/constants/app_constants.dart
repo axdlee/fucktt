@@ -58,6 +58,7 @@ class AppConstants {
   static const Map<String, String> supportedAIProviders = {
     'openai': 'OpenAI',
     'deepseek': 'DeepSeek',
+    'siliconflow': 'SiliconFlow',
     'anthropic': 'Anthropic',
     'google': 'Google Gemini',
     'alibaba': '通义千问',
@@ -69,6 +70,7 @@ class AppConstants {
   static const Map<String, List<String>> defaultModels = {
     'openai': ['gpt-3.5-turbo', 'gpt-4', 'gpt-4-turbo'],
     'deepseek': ['deepseek-chat', 'deepseek-coder'],
+    'siliconflow': ['deepseek-ai/DeepSeek-V2.5', 'Qwen/Qwen2.5-7B-Instruct', 'meta-llama/Meta-Llama-3.1-8B-Instruct'],
     'anthropic': ['claude-3-haiku', 'claude-3-sonnet', 'claude-3-opus'],
     'google': ['gemini-pro', 'gemini-pro-vision'],
     'alibaba': ['qwen-turbo', 'qwen-plus', 'qwen-max'],

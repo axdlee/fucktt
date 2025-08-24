@@ -42,11 +42,11 @@ class AIProvider extends ChangeNotifier {
       await _serviceManager.initialize();
       await _loadProviders();
       
-      // 如果没有任何AI服务，自动添加模拟服务
-      if (_providers.isEmpty || !_providers.any((p) => p.enabled)) {
-        await _addSimulationService();
-        await _loadProviders();
-      }
+      // 暂时移除自动添加模拟服务，避免ID冲突
+      // if (_providers.isEmpty || !_providers.any((p) => p.enabled)) {
+      //   await _addSimulationService();
+      //   await _loadProviders();
+      // }
       
       await _updateHealthStatus();
       
@@ -65,7 +65,7 @@ class AIProvider extends ChangeNotifier {
   /// 添加模拟AI服务（用于测试和演示）
   Future<void> _addSimulationService() async {
     final simulationProvider = AIProviderModel(
-      id: 'simulation',
+      id: 'ai_simulation_${DateTime.now().microsecondsSinceEpoch}',
       name: 'simulation',
       displayName: '模拟AI服务',
       baseUrl: 'mock://simulation',
@@ -255,6 +255,11 @@ class AIProvider extends ChangeNotifier {
     }
   }
 
+  /// 获取特定提供商的服务实例
+  AIService? getServiceForProvider(String providerId) {
+    return _serviceManager.getService(providerId);
+  }
+
   /// 获取可用模型列表
   Future<List<ModelConfig>> getAvailableModels(String providerId) async {
     try {
@@ -337,6 +342,33 @@ class AIProvider extends ChangeNotifier {
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
       priority: 2,
+    );
+  }
+
+  /// 创建通用AI提供商（支持更多类型）
+  AIProviderModel createCustomProvider({
+    required String name,
+    required String displayName,
+    required String apiKey,
+    required String baseUrl,
+    String? description,
+    List<ModelConfig>? supportedModels,
+    int priority = 5,
+  }) {
+    return AIProviderModel(
+      id: '${name.toLowerCase()}_${DateTime.now().microsecondsSinceEpoch}',
+      name: name.toLowerCase(),
+      displayName: displayName,
+      baseUrl: baseUrl,
+      apiKey: apiKey,
+      supportedModels: supportedModels ?? [
+        ModelConfig(modelId: 'default', displayName: '默认模型'),
+      ],
+      enabled: true,
+      description: description ?? '自定义AI服务',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      priority: priority,
     );
   }
 

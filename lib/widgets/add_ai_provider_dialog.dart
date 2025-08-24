@@ -23,7 +23,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
   final _baseUrlController = TextEditingController();
   final _descriptionController = TextEditingController();
   
-  String _selectedProvider = 'openai';
+  String _selectedProvider = '';
   int _priority = 1;
   bool _isTesting = false;
   bool _isPasswordVisible = false;
@@ -32,6 +32,11 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
   @override
   void initState() {
     super.initState();
+    
+    // 确保_selectedProvider的初始值是有效的
+    final supportedProviders = AppConstants.supportedAIProviders.keys.toList();
+    _selectedProvider = supportedProviders.isNotEmpty ? supportedProviders.first : 'openai';
+    
     if (_isEditMode) {
       _initForEdit();
     } else {
@@ -45,7 +50,18 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     _apiKeyController.text = provider.apiKey;
     _baseUrlController.text = provider.baseUrl;
     _descriptionController.text = provider.description ?? '';
-    _selectedProvider = provider.name.toLowerCase();
+    
+    // 确保 provider.name 在支持列表中
+    final providerName = provider.name.toLowerCase();
+    if (AppConstants.supportedAIProviders.containsKey(providerName)) {
+      _selectedProvider = providerName;
+    } else {
+      // 如果不在支持列表中，使用custom或第一个可用的
+      _selectedProvider = AppConstants.supportedAIProviders.containsKey('custom') 
+          ? 'custom' 
+          : AppConstants.supportedAIProviders.keys.first;
+    }
+    
     _priority = provider.priority;
   }
 
@@ -508,6 +524,12 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
           'baseUrl': 'https://dashscope.aliyuncs.com/api/v1',
           'description': '阿里云通义千问服务',
         };
+      case 'siliconflow':
+        return {
+          'name': 'SiliconFlow',
+          'baseUrl': 'https://api.siliconflow.cn/v1',
+          'description': 'SiliconFlow AI服务平台',
+        };
       case 'baidu':
         return {
           'name': '文心一言',
@@ -530,6 +552,8 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
         return Icons.psychology;
       case 'deepseek':
         return Icons.memory;
+      case 'siliconflow':
+        return Icons.computer;
       case 'anthropic':
         return Icons.android;
       case 'google':
@@ -550,6 +574,8 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
         return const Color(0xFF10A37F);
       case 'deepseek':
         return const Color(0xFF3B82F6);
+      case 'siliconflow':
+        return const Color(0xFF8B5CF6);
       case 'anthropic':
         return const Color(0xFFDB4444);
       case 'google':
@@ -577,15 +603,32 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
       final aiProvider = context.read<AIProvider>();
       
       // 创建临时的AI服务提供商进行测试
-      final tempProvider = _selectedProvider == 'openai'
-          ? aiProvider.createOpenAIProvider(
-              apiKey: _apiKeyController.text.trim(),
-              baseUrl: _baseUrlController.text.trim(),
-            )
-          : aiProvider.createDeepSeekProvider(
-              apiKey: _apiKeyController.text.trim(),
-              baseUrl: _baseUrlController.text.trim(),
-            );
+      AIProviderModel tempProvider;
+      
+      switch (_selectedProvider) {
+        case 'openai':
+          tempProvider = aiProvider.createOpenAIProvider(
+            apiKey: _apiKeyController.text.trim(),
+            baseUrl: _baseUrlController.text.trim(),
+          );
+          break;
+        case 'deepseek':
+          tempProvider = aiProvider.createDeepSeekProvider(
+            apiKey: _apiKeyController.text.trim(),
+            baseUrl: _baseUrlController.text.trim(),
+          );
+          break;
+        default:
+          // 对于其他类型，使用通用创建方法
+          tempProvider = aiProvider.createCustomProvider(
+            name: _selectedProvider,
+            displayName: _nameController.text.trim(),
+            apiKey: _apiKeyController.text.trim(),
+            baseUrl: _baseUrlController.text.trim(),
+            description: _descriptionController.text.trim(),
+          );
+          break;
+      }
       
       final result = await aiProvider.testProvider(tempProvider);
       
@@ -641,15 +684,30 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
         await aiProvider.updateProvider(provider);
       } else {
         // 新增模式：创建新的提供商
-        provider = _selectedProvider == 'openai'
-            ? aiProvider.createOpenAIProvider(
-                apiKey: _apiKeyController.text.trim(),
-                baseUrl: _baseUrlController.text.trim(),
-              )
-            : aiProvider.createDeepSeekProvider(
-                apiKey: _apiKeyController.text.trim(),
-                baseUrl: _baseUrlController.text.trim(),
-              );
+        switch (_selectedProvider) {
+          case 'openai':
+            provider = aiProvider.createOpenAIProvider(
+              apiKey: _apiKeyController.text.trim(),
+              baseUrl: _baseUrlController.text.trim(),
+            );
+            break;
+          case 'deepseek':
+            provider = aiProvider.createDeepSeekProvider(
+              apiKey: _apiKeyController.text.trim(),
+              baseUrl: _baseUrlController.text.trim(),
+            );
+            break;
+          default:
+            // 对于其他类型，使用通用创建方法
+            provider = aiProvider.createCustomProvider(
+              name: _selectedProvider,
+              displayName: _nameController.text.trim(),
+              apiKey: _apiKeyController.text.trim(),
+              baseUrl: _baseUrlController.text.trim(),
+              description: _descriptionController.text.trim(),
+            );
+            break;
+        }
         
         // 设置自定义配置
         final updatedProvider = provider.copyWith(

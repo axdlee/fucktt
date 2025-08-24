@@ -9,7 +9,7 @@ class AISimulationService implements AIService {
   
   AISimulationService() {
     _provider = AIProviderModel(
-      id: 'simulation',
+      id: 'ai_simulation_${DateTime.now().microsecondsSinceEpoch}',
       name: 'simulation',
       displayName: '模拟AI服务',
       baseUrl: 'mock://simulation',
