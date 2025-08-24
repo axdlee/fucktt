@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 
 import 'ocr_service.dart';
 import 'chinese_ocr_service.dart';
+import 'local_ocr_service.dart';
 
 /// 🔧 OCR服务管理器
 /// 统一管理Google ML Kit和国产OCR服务
@@ -22,9 +23,13 @@ class OCRServiceManager {
   // 国产OCR服务
   final ChineseOCRService _chineseOCRService = ChineseOCRService.instance;
   
+  // 本地OCR服务
+  final LocalOCRService _localOCRService = LocalOCRService.instance;
+  
   // 可用性状态
   bool _googleMLKitAvailable = false;
   bool _chineseOCRAvailable = false;
+  bool _localOCRAvailable = false;
   
   /// 初始化OCR服务管理器
   Future<void> initialize() async {
