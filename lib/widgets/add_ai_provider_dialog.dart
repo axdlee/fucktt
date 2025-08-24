@@ -74,10 +74,16 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     // 确保优先级值在有效范围内（1-10）
     _priority = provider.priority.clamp(1, 10);
     
+    // 关键修复：初始化当前配置的模型
+    if (provider.supportedModels.isNotEmpty) {
+      _selectedModelId = provider.supportedModels.first.modelId;
+      print('🎯 编辑模式：设置当前模型为 ${_selectedModelId}');
+    }
+    
     // 编辑模式下，如果有API密钥和基础URL，显示模型选择器
     if (_apiKeyController.text.trim().isNotEmpty && _baseUrlController.text.trim().isNotEmpty) {
       _showModelSelector = true;
-      // 延迟加载模型列表
+      // 延迟加载模型列表，但保持当前选择
       WidgetsBinding.instance.addPostFrameCallback((_) {
         _loadAvailableModels();
       });
@@ -654,6 +660,72 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     }
   }
 
+  /// 构建模型下拉列表项
+  List<DropdownMenuItem<String>> _buildModelDropdownItems() {
+    final List<ModelConfig> allModels = List.from(_availableModels);
+    
+    // 在编辑模式下，如果当前选中的模型不在API列表中，添加它
+    if (_isEditMode && _selectedModelId != null && 
+        !_availableModels.any((m) => m.modelId == _selectedModelId)) {
+      allModels.insert(0, ModelConfig(
+        modelId: _selectedModelId!,
+        displayName: _selectedModelId!,
+        description: '当前配置的模型',
+      ));
+    }
+    
+    return allModels.map((model) {
+      return DropdownMenuItem<String>(
+        value: model.modelId,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    model.displayName.isNotEmpty ? model.displayName : model.modelId,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                // 在编辑模式下，如果是当前配置的模型但不在API列表中，显示标识
+                if (_isEditMode && _selectedModelId == model.modelId && 
+                    !_availableModels.any((m) => m.modelId == _selectedModelId))
+                  Container(
+                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                    decoration: BoxDecoration(
+                      color: AppConstants.primaryColor.withOpacity(0.2),
+                      borderRadius: BorderRadius.circular(4.r),
+                    ),
+                    child: Text(
+                      '当前',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: AppConstants.primaryColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+            if (model.description != null && model.description!.isNotEmpty)
+              Text(
+                model.description!,
+                style: TextStyle(
+                  fontSize: 12.sp,
+                  color: AppConstants.textSecondaryColor,
+                ),
+              ),
+          ],
+        ),
+      );
+    }).toList();
+  }
+
   /// 构建模型选择器
   Widget _buildModelSelector() {
     return Column(
@@ -687,7 +759,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
         
         SizedBox(height: 8.h),
         
-        if (_availableModels.isNotEmpty) ...[
+        if (_availableModels.isNotEmpty || (_isEditMode && _selectedModelId != null)) ...[
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -706,32 +778,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                     color: AppConstants.textSecondaryColor,
                   ),
                 ),
-                items: _availableModels.map((model) {
-                  return DropdownMenuItem<String>(
-                    value: model.modelId,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          model.displayName.isNotEmpty ? model.displayName : model.modelId,
-                          style: TextStyle(
-                            fontSize: 14.sp,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                        if (model.description != null && model.description!.isNotEmpty)
-                          Text(
-                            model.description!,
-                            style: TextStyle(
-                              fontSize: 12.sp,
-                              color: AppConstants.textSecondaryColor,
-                            ),
-                          ),
-                      ],
-                    ),
-                  );
-                }).toList(),
+                items: _buildModelDropdownItems(),
                 onChanged: (value) {
                   setState(() {
                     _selectedModelId = value;
@@ -826,9 +873,20 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
       if (mounted) {
         setState(() {
           _availableModels = models;
-          // 如果当前选中的模型不在列表中，清空选择
-          if (_selectedModelId != null && 
-              !models.any((m) => m.modelId == _selectedModelId)) {
+          // 在编辑模式下，保持当前模型选择（如果存在于新列表中）
+          if (_isEditMode && _selectedModelId != null) {
+            // 检查当前模型是否在新获取的列表中
+            final modelExists = models.any((m) => m.modelId == _selectedModelId);
+            if (!modelExists) {
+              print('⚠️ 当前模型 ${_selectedModelId} 不在API返回的列表中，保持原选择');
+              // 在编辑模式下，即使模型不在新列表中，也保持当前选择
+              // 不清空 _selectedModelId
+            } else {
+              print('✅ 当前模型 ${_selectedModelId} 在API列表中，保持选中');
+            }
+          } else if (!_isEditMode && _selectedModelId != null && 
+                     !models.any((m) => m.modelId == _selectedModelId)) {
+            // 非编辑模式下，如果当前选中的模型不在列表中，清空选择
             _selectedModelId = null;
           }
         });
