@@ -78,7 +78,8 @@ class AISimulationService implements AIService {
     Map<String, dynamic>? parameters,
   }) async {
     // 模拟网络延迟
-    await Future.delayed(const Duration(milliseconds: 800 + (DateTime.now().millisecond % 500)));
+    final delay = 800 + (DateTime.now().millisecond % 500);
+    await Future.delayed(Duration(milliseconds: delay));
 
     // 从prompt中提取要分析的内容
     final content = _extractContentFromPrompt(prompt);

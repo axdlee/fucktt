@@ -595,7 +595,7 @@ class _FilterSimulationPageState extends State<FilterSimulationPage> {
         '$label ${(value * 100).toStringAsFixed(0)}%',
         style: TextStyle(
           fontSize: 12.sp,
-          color: color.shade700,
+          color: color,
           fontWeight: FontWeight.w500,
         ),
       ),
@@ -625,10 +625,10 @@ class _FilterSimulationPageState extends State<FilterSimulationPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildDetailRow('内容类型', result.contentType.name),
-              _buildDetailRow('分析时间', latestResult.analyzedAt.toString().substring(0, 19)),
-              _buildDetailRow('AI模型', latestResult.aiProviderId.isNotEmpty ? latestResult.aiProviderId : '本地分析'),
-              if (latestResult.extractedTopics.isNotEmpty)
-                _buildDetailRow('内容标签', latestResult.extractedTopics.join(', ')),
+              _buildDetailRow('分析时间', result.analyzedAt.toString().substring(0, 19)),
+              _buildDetailRow('AI模型', result.aiProviderId.isNotEmpty ? result.aiProviderId : '本地分析'),
+              if (result.extractedTopics.isNotEmpty)
+                _buildDetailRow('内容标签', result.extractedTopics.join(', ')),
             ],
           ),
         ),
@@ -770,7 +770,7 @@ class _FilterSimulationPageState extends State<FilterSimulationPage> {
           SnackBar(
             content: Text('✅ 分析完成！结果：${_getActionText(result.recommendedAction)}'),
             behavior: SnackBarBehavior.floating,
-            backgroundColor: _getActionColor(result.filterAction),
+            backgroundColor: _getActionColor(result.recommendedAction),
           ),
         );
       } else {
