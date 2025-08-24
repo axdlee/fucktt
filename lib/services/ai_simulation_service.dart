@@ -208,7 +208,8 @@ class AISimulationService implements AIService {
         '教育价值': contentLower.contains('教育') ? 0.8 : 0.3,
         '科技创新': contentLower.contains('科技') ? 0.9 : 0.2,
       },
-      'tags': tags,
+      'topics': tags,
+      'riskLevel': overallScore < 0.3 ? 'high' : overallScore < 0.6 ? 'medium' : 'low',
       'reasoning': _generateReasoning(content, overallScore, dominantSentiment),
       'recommendations': _generateRecommendations(overallScore),
     };
@@ -235,21 +236,4 @@ class AISimulationService implements AIService {
       return ['建议跳过', '避免传播', '寻找正面内容'];
     }
   }
-}
-
-
-  });
-}
-
-/// AI使用情况数据模型
-class AIUsage {
-  final int promptTokens;
-  final int completionTokens;
-  final int totalTokens;
-
-  AIUsage({
-    required this.promptTokens,
-    required this.completionTokens,
-    required this.totalTokens,
-  });
 }

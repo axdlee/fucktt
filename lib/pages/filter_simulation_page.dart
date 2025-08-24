@@ -174,7 +174,7 @@ class _FilterSimulationPageState extends State<FilterSimulationPage> {
                 borderRadius: BorderRadius.circular(8.r),
               ),
               filled: true,
-              fillColor: Theme.of(context).colorScheme.surfaceVariant,
+              fillColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
             style: TextStyle(fontSize: 14.sp),
           ),
@@ -618,7 +618,7 @@ class _FilterSimulationPageState extends State<FilterSimulationPage> {
         Container(
           padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.surfaceVariant,
+            color: Theme.of(context).colorScheme.surfaceContainerHighest,
             borderRadius: BorderRadius.circular(8.r),
           ),
           child: Column(
