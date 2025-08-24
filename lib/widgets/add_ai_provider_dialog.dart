@@ -70,7 +70,17 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
           : AppConstants.supportedAIProviders.keys.first;
     }
     
-    _priority = provider.priority;
+    // 确保优先级值在有效范围内（1-10）
+    _priority = provider.priority.clamp(1, 10);
+    
+    // 编辑模式下，如果有API密钥和基础URL，显示模型选择器
+    if (_apiKeyController.text.trim().isNotEmpty && _baseUrlController.text.trim().isNotEmpty) {
+      _showModelSelector = true;
+      // 延迟加载模型列表
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        _loadAvailableModels();
+      });
+    }
   }
 
   @override
@@ -140,7 +150,14 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                         onChanged: (value) {
                           // API密钥变化时，自动拉取模型列表
                           if (value.trim().isNotEmpty && _baseUrlController.text.trim().isNotEmpty) {
+                            setState(() {
+                              _showModelSelector = true;
+                            });
                             _loadModelsAfterDelay();
+                          } else {
+                            setState(() {
+                              _showModelSelector = value.trim().isNotEmpty && _baseUrlController.text.trim().isNotEmpty;
+                            });
                           }
                         },
                       ),
@@ -165,7 +182,14 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                         onChanged: (value) {
                           // 基础URL变化时，自动拉取模型列表
                           if (value.trim().isNotEmpty && _apiKeyController.text.trim().isNotEmpty) {
+                            setState(() {
+                              _showModelSelector = true;
+                            });
                             _loadModelsAfterDelay();
+                          } else {
+                            setState(() {
+                              _showModelSelector = value.trim().isNotEmpty && _apiKeyController.text.trim().isNotEmpty;
+                            });
                           }
                         },
                       ),
@@ -276,8 +300,12 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
               if (value != null) {
                 setState(() {
                   _selectedProvider = value;
-                  _updateProviderDefaults();
+                  // 重置模型选择状态
+                  _selectedModelId = null;
+                  _availableModels.clear();
+                  _showModelSelector = false;
                 });
+                _updateProviderDefaults();
               }
             },
             items: AppConstants.supportedAIProviders.entries.map((entry) {
@@ -520,6 +548,11 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     _nameController.text = defaults['name'] ?? '';
     _baseUrlController.text = defaults['baseUrl'] ?? '';
     _descriptionController.text = defaults['description'] ?? '';
+    
+    // 如果基础URL不为空，设置显示模型选择器（不调用setState）
+    if (_baseUrlController.text.trim().isNotEmpty) {
+      _showModelSelector = true;
+    }
   }
 
   /// 获取服务商默认配置
