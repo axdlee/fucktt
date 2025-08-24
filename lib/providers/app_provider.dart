@@ -13,6 +13,13 @@ class AppProvider extends ChangeNotifier {
   bool _isLoading = false;
   String? _errorMessage;
 
+  AppProvider() {
+    // 延迟初始化，避免在build过程中调用notifyListeners
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      initialize();
+    });
+  }
+
   // Getters
   UserConfigModel? get userConfig => _userConfig;
   ThemeMode get themeMode => _themeMode;

@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:provider/provider.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'providers/app_provider.dart';
 import 'providers/ai_provider.dart';
@@ -82,7 +83,7 @@ class ValueFilterApp extends StatelessWidget {
       builder: (context, child) {
         return MultiProvider(
           providers: [
-            ChangeNotifierProvider(create: (_) => AppProvider()),
+            ChangeNotifierProvider(create: (_) => AppProvider(), lazy: false),
             ChangeNotifierProvider(create: (_) => AIProvider()),
             ChangeNotifierProvider(create: (_) => ValuesProvider()),
             ChangeNotifierProvider(create: (_) => ContentProvider()),
@@ -103,6 +104,11 @@ class ValueFilterApp extends StatelessWidget {
                 supportedLocales: const [
                   Locale('zh', 'CN'),
                   Locale('en', 'US'),
+                ],
+                localizationsDelegates: const [
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
                 ],
                 
                 // 路由配置
