@@ -887,7 +887,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     try {
       final aiProvider = context.read<AIProvider>();
       
-      // 创建临时的AI服务提供商进行测试
+      // 创建临时的AI服务提供商进行测试，使用智能模型选择
       AIProviderModel tempProvider;
       
       switch (_selectedProvider) {
@@ -914,6 +914,14 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
           );
           break;
       }
+      
+      // 关键修复：为临时provider设置正确的模型配置
+      final effectiveModels = _getEffectiveSupportedModels();
+      tempProvider = tempProvider.copyWith(
+        supportedModels: effectiveModels,
+      );
+      
+      print('🗺️ 测试连接使用模型: ${effectiveModels.isNotEmpty ? effectiveModels.first.modelId : "无模型"}');
       
       final result = await aiProvider.testProvider(tempProvider);
       
@@ -943,6 +951,81 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     }
   }
 
+  /// 获取有效的模型配置
+  List<ModelConfig> _getEffectiveSupportedModels() {
+    // 1. 如果用户选择了具体模型，优先使用
+    if (_selectedModelId != null) {
+      final selectedModel = _availableModels
+          .where((m) => m.modelId == _selectedModelId)
+          .firstOrNull;
+      
+      if (selectedModel != null) {
+        return [selectedModel];
+      } else {
+        // 如果选中的模型不在列表中，创建一个新的
+        return [ModelConfig(
+          modelId: _selectedModelId!,
+          displayName: _selectedModelId!,
+        )];
+      }
+    }
+    
+    // 2. 如果有从 API 获取的模型列表，选择第一个适合的模型
+    if (_availableModels.isNotEmpty) {
+      // 对于 SiliconFlow，优先选择 DeepSeek 模型
+      if (_selectedProvider == 'siliconflow' || 
+          _baseUrlController.text.toLowerCase().contains('siliconflow')) {
+        final deepseekModel = _availableModels
+            .where((m) => m.modelId.toLowerCase().contains('deepseek'))
+            .firstOrNull;
+        if (deepseekModel != null) {
+          print('🎯 为 SiliconFlow 自动选择模型: ${deepseekModel.modelId}');
+          return [deepseekModel];
+        }
+      }
+      
+      // 否则选择第一个可用模型
+      print('🎯 自动选择第一个模型: ${_availableModels.first.modelId}');
+      return [_availableModels.first];
+    }
+    
+    // 3. 如果没有获取到模型，使用默认配置
+    return _getDefaultModelsForProvider();
+  }
+  
+  /// 获取服务商的默认模型配置
+  List<ModelConfig> _getDefaultModelsForProvider() {
+    final providerName = _selectedProvider.toLowerCase();
+    final baseUrl = _baseUrlController.text.toLowerCase();
+    
+    if (baseUrl.contains('siliconflow') || providerName == 'siliconflow') {
+      return [ModelConfig(
+        modelId: 'deepseek-ai/DeepSeek-V2.5',
+        displayName: 'DeepSeek-V2.5',
+        description: '深度求索最新模型，综合能力强',
+      )];
+    } else if (providerName == 'openai' || baseUrl.contains('openai')) {
+      return [ModelConfig(
+        modelId: 'gpt-3.5-turbo',
+        displayName: 'GPT-3.5 Turbo',
+        description: 'OpenAI经典模型，速度快',
+      )];
+    } else if (providerName == 'deepseek' || baseUrl.contains('deepseek')) {
+      return [ModelConfig(
+        modelId: 'deepseek-chat',
+        displayName: 'DeepSeek Chat',
+        description: 'DeepSeek对话模型',
+      )];
+    }
+    
+    // 通用默认
+    return [ModelConfig(
+      modelId: 'gpt-3.5-turbo',
+      displayName: '默认模型',
+      description: '服务商默认AI模型',
+    )];
+  }
+
   /// 添加服务提供商
   void _addProvider() async {
     if (!_formKey.currentState!.validate()) {
@@ -964,18 +1047,8 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
               ? null 
               : _descriptionController.text.trim(),
           priority: _priority,
-          // 如果选择了模型，更新支持的模型列表
-          supportedModels: _selectedModelId != null 
-              ? [ModelConfig(
-                  modelId: _selectedModelId!,
-                  displayName: _availableModels
-                      .where((m) => m.modelId == _selectedModelId)
-                      .firstOrNull?.displayName ?? _selectedModelId!,
-                  description: _availableModels
-                      .where((m) => m.modelId == _selectedModelId)
-                      .firstOrNull?.description,
-                )]
-              : widget.editProvider!.supportedModels,
+          // 确保有正确的模型配置
+          supportedModels: _getEffectiveSupportedModels(),
         );
         
         await aiProvider.updateProvider(provider);
@@ -1013,18 +1086,8 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
               ? null 
               : _descriptionController.text.trim(),
           priority: _priority,
-          // 如果选择了模型，设置为默认模型
-          supportedModels: _selectedModelId != null 
-              ? [ModelConfig(
-                  modelId: _selectedModelId!,
-                  displayName: _availableModels
-                      .where((m) => m.modelId == _selectedModelId)
-                      .firstOrNull?.displayName ?? _selectedModelId!,
-                  description: _availableModels
-                      .where((m) => m.modelId == _selectedModelId)
-                      .firstOrNull?.description,
-                )]
-              : provider.supportedModels,
+          // 确保有正确的模型配置
+          supportedModels: _getEffectiveSupportedModels(),
         );
         
         // 添加到Provider
