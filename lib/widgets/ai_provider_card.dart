@@ -404,7 +404,14 @@ class AIProviderCard extends StatelessWidget {
 
   /// 显示优先级调整对话框
   void _showPriorityDialog(BuildContext context) {
+    // 确保优先级值在有效范围内（1-10）
+    // 特殊处理：如果是模拟服务的99优先级，显示为10（最低优先级）
     int currentPriority = provider.priority;
+    if (currentPriority > 10) {
+      currentPriority = 10; // 超出范围的值统一设为最低优先级
+    } else if (currentPriority < 1) {
+      currentPriority = 1; // 低于范围的值统一设为最高优先级
+    }
     
     showDialog(
       context: context,
@@ -445,7 +452,9 @@ class AIProviderCard extends StatelessWidget {
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
-                onPriorityChanged?.call(currentPriority);
+                // 如果原始优先级是99（模拟服务），保持不变
+                int finalPriority = provider.priority > 10 ? provider.priority : currentPriority;
+                onPriorityChanged?.call(finalPriority);
               },
               child: const Text('确定'),
             ),
