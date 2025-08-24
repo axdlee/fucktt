@@ -180,9 +180,32 @@ class TestService {
     await _runTest(
       '配置数据导出导入',
       () async {
-        final exported = UserConfigService.exportUserConfig();
-        final success = await UserConfigService.importUserConfig(exported);
-        return exported.isNotEmpty && success;
+        try {
+          // 导出配置
+          final exported = UserConfigService.exportUserConfig();
+          
+          // 验证导出数据不为空
+          if (exported.isEmpty) {
+            print('导出数据为空');
+            return false;
+          }
+          
+          // 导入配置
+          final success = await UserConfigService.importUserConfig(exported);
+          
+          if (!success) {
+            print('导入配置失败');
+            return false;
+          }
+          
+          // 验证导入后配置是否正常
+          final importedConfig = UserConfigService.getUserConfig();
+          return importedConfig != null;
+          
+        } catch (e) {
+          print('导入用户配置失败: $e');
+          return false;
+        }
       },
     );
   }

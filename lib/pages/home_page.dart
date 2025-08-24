@@ -178,26 +178,32 @@ class _HomePageState extends State<HomePage> {
           Row(
             children: [
               Expanded(
-                child: _buildStatusItem(
-                  icon: Icons.smart_toy_outlined,
-                  title: 'AI服务',
-                  value: '${aiProvider.healthyProviders.length}/${aiProvider.providers.length}',
-                  subtitle: '可用/总数',
-                  color: aiProvider.hasAvailableServices 
-                      ? AppConstants.successColor 
-                      : AppConstants.errorColor,
+                child: GestureDetector(
+                  onTap: () => context.push(AppRoutes.aiConfig),
+                  child: _buildStatusItem(
+                    icon: Icons.smart_toy_outlined,
+                    title: 'AI服务',
+                    value: '${aiProvider.healthyProviders.length}/${aiProvider.providers.length}',
+                    subtitle: '可用/总数',
+                    color: aiProvider.hasAvailableServices 
+                        ? AppConstants.successColor 
+                        : AppConstants.errorColor,
+                  ),
                 ),
               ),
               
               SizedBox(width: 16.w),
               
               Expanded(
-                child: _buildStatusItem(
-                  icon: Icons.favorite_outline,
-                  title: '价值观模板',
-                  value: valuesProvider.enabledTemplates.length.toString(),
-                  subtitle: '已启用',
-                  color: AppConstants.primaryColor,
+                child: GestureDetector(
+                  onTap: () => context.push(AppRoutes.values),
+                  child: _buildStatusItem(
+                    icon: Icons.favorite_outline,
+                    title: '价值观模板',
+                    value: valuesProvider.enabledTemplates.length.toString(),
+                    subtitle: '已启用',
+                    color: AppConstants.primaryColor,
+                  ),
                 ),
               ),
             ],
@@ -208,24 +214,30 @@ class _HomePageState extends State<HomePage> {
           Row(
             children: [
               Expanded(
-                child: _buildStatusItem(
-                  icon: Icons.analytics_outlined,
-                  title: '今日分析',
-                  value: contentProvider.totalAnalyzed.toString(),
-                  subtitle: '条内容',
-                  color: AppConstants.infoColor,
+                child: GestureDetector(
+                  onTap: () => context.push(AppRoutes.filterHistory),
+                  child: _buildStatusItem(
+                    icon: Icons.analytics_outlined,
+                    title: '今日分析',
+                    value: contentProvider.totalAnalyzed.toString(),
+                    subtitle: '条内容',
+                    color: AppConstants.infoColor,
+                  ),
                 ),
               ),
               
               SizedBox(width: 16.w),
               
               Expanded(
-                child: _buildStatusItem(
-                  icon: Icons.block_outlined,
-                  title: '过滤效率',
-                  value: '${(contentProvider.filterEfficiency * 100).toStringAsFixed(1)}%',
-                  subtitle: '拦截率',
-                  color: AppConstants.warningColor,
+                child: GestureDetector(
+                  onTap: () => context.push(AppRoutes.filterHistory),
+                  child: _buildStatusItem(
+                    icon: Icons.block_outlined,
+                    title: '过滤效率',
+                    value: '${(contentProvider.filterEfficiency * 100).toStringAsFixed(1)}%',
+                    subtitle: '拦截率',
+                    color: AppConstants.warningColor,
+                  ),
                 ),
               ),
             ],

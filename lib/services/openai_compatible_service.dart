@@ -65,6 +65,7 @@ class OpenAICompatibleService implements AIService {
       
       if (response.statusCode == 200) {
         final result = _parseResponse(response.data, model);
+        print('🎯 响应内容: ${result.content}');
         print('✅ AI响应成功: ${result.content.length}字符');
         return result;
       } else {
