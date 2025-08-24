@@ -6,6 +6,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import '../models/ai_provider_model.dart';
 import '../providers/ai_provider.dart';
 import '../constants/app_constants.dart';
+import '../services/openai_compatible_service.dart';
 import 'ai_model_selector.dart';
 
 /// 添加AI服务提供商对话框
@@ -803,40 +804,66 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     });
 
     try {
-      final aiProvider = context.read<AIProvider>();
-      
-      // 创建临时的AI服务提供商进行模型获取
-      final tempProvider = aiProvider.createCustomProvider(
+      // 直接创建临时的AI服务来获取模型列表
+      final tempProvider = AIProviderModel(
+        id: 'temp_${DateTime.now().microsecondsSinceEpoch}',
         name: _selectedProvider,
-        displayName: _nameController.text.trim().isNotEmpty 
-            ? _nameController.text.trim() 
-            : 'Temp Provider',
-        apiKey: apiKey,
+        displayName: 'Temporary Provider',
         baseUrl: baseUrl,
+        apiKey: apiKey,
+        enabled: true,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
       );
       
-      final service = aiProvider.getServiceForProvider(tempProvider.id);
-      if (service != null) {
-        final models = await service.getAvailableModels();
+      // 直接创建OpenAI兼容服务
+      final tempService = OpenAICompatibleService(tempProvider);
+      
+      print('🔍 开始获取模型列表: ${tempProvider.baseUrl}');
+      final models = await tempService.getAvailableModels();
+      print('✅ 成功获取${models.length}个模型');
+      
+      if (mounted) {
+        setState(() {
+          _availableModels = models;
+          // 如果当前选中的模型不在列表中，清空选择
+          if (_selectedModelId != null && 
+              !models.any((m) => m.modelId == _selectedModelId)) {
+            _selectedModelId = null;
+          }
+        });
         
-        if (mounted) {
-          setState(() {
-            _availableModels = models;
-            // 如果当前选中的模型不在列表中，清空选择
-            if (_selectedModelId != null && 
-                !models.any((m) => m.modelId == _selectedModelId)) {
-              _selectedModelId = null;
-            }
-          });
+        // 显示成功消息
+        if (models.isNotEmpty) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('成功获取${models.length}个可用模型'),
+              backgroundColor: AppConstants.successColor,
+              duration: Duration(seconds: 2),
+            ),
+          );
         }
       }
+      
+      // 清理临时服务
+      tempService.dispose();
+      
     } catch (e) {
-      print('获取模型列表失败: $e');
+      print('❌ 获取模型列表失败: $e');
       if (mounted) {
         setState(() {
           _availableModels.clear();
           _selectedModelId = null;
         });
+        
+        // 显示错误消息
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('获取模型列表失败: $e'),
+            backgroundColor: AppConstants.errorColor,
+            duration: Duration(seconds: 3),
+          ),
+        );
       }
     } finally {
       if (mounted) {
