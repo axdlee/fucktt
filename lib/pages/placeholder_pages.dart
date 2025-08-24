@@ -289,36 +289,64 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
           // 操作按钮
           Row(
             children: [
-              Text(
-                '创建于 ${_formatDate(prompt['createdAt'] as DateTime)}',
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  color: AppConstants.textTertiaryColor,
+              Expanded(
+                child: Text(
+                  '创建于 ${_formatDate(prompt['createdAt'] as DateTime)}',
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: AppConstants.textTertiaryColor,
+                  ),
                 ),
               ),
               
-              const Spacer(),
-              
-              TextButton.icon(
-                onPressed: () => _showPromptDetail(prompt),
-                icon: Icon(Icons.visibility_outlined, size: 16.sp),
-                label: Text('查看', style: TextStyle(fontSize: 12.sp)),
-              ),
-              
-              SizedBox(width: 8.w),
-              
-              TextButton.icon(
-                onPressed: () => _showEditPromptDialog(prompt, index),
-                icon: Icon(Icons.edit_outlined, size: 16.sp),
-                label: Text('编辑', style: TextStyle(fontSize: 12.sp)),
-              ),
-              
-              SizedBox(width: 8.w),
-              
-              TextButton.icon(
-                onPressed: () => _deletePrompt(index),
-                icon: Icon(Icons.delete_outline, size: 16.sp, color: AppConstants.errorColor),
-                label: Text('删除', style: TextStyle(fontSize: 12.sp, color: AppConstants.errorColor)),
+              // 用弹出菜单来节省空间
+              PopupMenuButton<String>(
+                icon: Icon(Icons.more_vert, size: 16.sp),
+                onSelected: (action) {
+                  switch (action) {
+                    case 'view':
+                      _showPromptDetail(prompt);
+                      break;
+                    case 'edit':
+                      _showEditPromptDialog(prompt, index);
+                      break;
+                    case 'delete':
+                      _deletePrompt(index);
+                      break;
+                  }
+                },
+                itemBuilder: (context) => [
+                  PopupMenuItem(
+                    value: 'view',
+                    child: Row(
+                      children: [
+                        Icon(Icons.visibility_outlined, size: 16.sp),
+                        SizedBox(width: 8.w),
+                        Text('查看', style: TextStyle(fontSize: 12.sp)),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'edit',
+                    child: Row(
+                      children: [
+                        Icon(Icons.edit_outlined, size: 16.sp),
+                        SizedBox(width: 8.w),
+                        Text('编辑', style: TextStyle(fontSize: 12.sp)),
+                      ],
+                    ),
+                  ),
+                  PopupMenuItem(
+                    value: 'delete',
+                    child: Row(
+                      children: [
+                        Icon(Icons.delete_outline, size: 16.sp, color: AppConstants.errorColor),
+                        SizedBox(width: 8.w),
+                        Text('删除', style: TextStyle(fontSize: 12.sp, color: AppConstants.errorColor)),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
@@ -966,11 +994,14 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
                 color: AppConstants.textTertiaryColor,
               ),
               SizedBox(width: 4.w),
-              Text(
-                item['source'] as String,
-                style: TextStyle(
-                  fontSize: 11.sp,
-                  color: AppConstants.textTertiaryColor,
+              Flexible(
+                child: Text(
+                  item['source'] as String,
+                  style: TextStyle(
+                    fontSize: 11.sp,
+                    color: AppConstants.textTertiaryColor,
+                  ),
+                  overflow: TextOverflow.ellipsis,
                 ),
               ),
               
