@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../constants/app_constants.dart';
 import '../providers/app_provider.dart';
@@ -44,6 +46,54 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
       'createdAt': DateTime.now().subtract(const Duration(days: 1)),
     },
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadPromptTemplates();
+  }
+
+  /// 加载Prompt模板
+  Future<void> _loadPromptTemplates() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final templatesJson = prefs.getString('prompt_templates');
+      if (templatesJson != null) {
+        final List<dynamic> templatesList = json.decode(templatesJson);
+        setState(() {
+          _promptTemplates.clear();
+          _promptTemplates.addAll(templatesList.map((item) {
+            // 确保 createdAt 是 DateTime 对象
+            if (item['createdAt'] is String) {
+              item['createdAt'] = DateTime.parse(item['createdAt']);
+            }
+            return Map<String, dynamic>.from(item);
+          }).toList());
+        });
+      }
+    } catch (e) {
+      print('加载Prompt模板失败: $e');
+    }
+  }
+
+  /// 保存Prompt模板
+  Future<void> _savePromptTemplates() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      // 将DateTime转换为字符串以便序列化
+      final templatesForSave = _promptTemplates.map((template) {
+        final copy = Map<String, dynamic>.from(template);
+        if (copy['createdAt'] is DateTime) {
+          copy['createdAt'] = (copy['createdAt'] as DateTime).toIso8601String();
+        }
+        return copy;
+      }).toList();
+      
+      await prefs.setString('prompt_templates', json.encode(templatesForSave));
+    } catch (e) {
+      print('保存Prompt模板失败: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -265,10 +315,22 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
               // 状态切换
               Switch(
                 value: isEnabled,
-                onChanged: (value) {
+                onChanged: (value) async {
                   setState(() {
                     _promptTemplates[index]['enabled'] = value;
                   });
+                  
+                  // 添加持久化存储逻辑
+                  await _savePromptTemplates();
+                  
+                  // 显示反馈
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(value ? 'Prompt已启用' : 'Prompt已禁用'),
+                      backgroundColor: AppConstants.successColor,
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
                 },
               ),
             ],
@@ -426,7 +488,7 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
             child: const Text('取消'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               final newPrompt = {
                 'id': prompt?['id'] ?? 'prompt_${DateTime.now().millisecondsSinceEpoch}',
                 'name': nameController.text,
@@ -444,6 +506,9 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                   _promptTemplates.add(newPrompt);
                 }
               });
+              
+              // 保存到本地
+              await _savePromptTemplates();
               
               Navigator.pop(context);
               
@@ -520,10 +585,14 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
             child: const Text('取消'),
           ),
           TextButton(
-            onPressed: () {
+            onPressed: () async {
               setState(() {
                 _promptTemplates.removeAt(index);
               });
+              
+              // 保存到本地
+              await _savePromptTemplates();
+              
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -1197,9 +1266,16 @@ class _SettingsPageState extends State<SettingsPage> {
             trailing: DropdownButton<ThemeMode>(
               value: appProvider.themeMode,
               underline: const SizedBox(),
-              onChanged: (mode) {
+              onChanged: (mode) async {
                 if (mode != null) {
-                  appProvider.setThemeMode(mode);
+                  await appProvider.setThemeMode(mode);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('主题模式已设置为${_getThemeModeText(mode)}'),
+                      backgroundColor: AppConstants.successColor,
+                      duration: const Duration(seconds: 1),
+                    ),
+                  );
                 }
               },
               items: [
@@ -1214,34 +1290,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 DropdownMenuItem(
                   value: ThemeMode.dark,
                   child: Text('深色模式', style: TextStyle(fontSize: 12.sp)),
-                ),
-              ],
-            ),
-          ),
-          
-          // 语言设置
-          ListTile(
-            leading: Icon(Icons.language_outlined, size: 20.sp),
-            title: Text('语言', style: TextStyle(fontSize: 14.sp)),
-            subtitle: Text(_getLanguageText(appProvider.appSettings.language),
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
-            trailing: DropdownButton<String>(
-              value: appProvider.appSettings.language,
-              underline: const SizedBox(),
-              onChanged: (language) {
-                if (language != null) {
-                  final newSettings = appProvider.appSettings.copyWith(language: language);
-                  appProvider.updateAppSettings(newSettings);
-                }
-              },
-              items: [
-                DropdownMenuItem(
-                  value: 'zh_CN',
-                  child: Text('简体中文', style: TextStyle(fontSize: 12.sp)),
-                ),
-                DropdownMenuItem(
-                  value: 'en_US',
-                  child: Text('English', style: TextStyle(fontSize: 12.sp)),
                 ),
               ],
             ),
@@ -1285,8 +1333,15 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: Text('接收应用通知和提醒',
                          style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.appSettings.enableNotifications,
-            onChanged: (value) {
-              appProvider.toggleNotifications();
+            onChanged: (value) async {
+              await appProvider.toggleNotifications();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value ? '已开启通知' : '已关闭通知'),
+                  backgroundColor: AppConstants.successColor,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
             },
           ),
           
@@ -1297,8 +1352,15 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: Text('显示应用悬浮操作按钮',
                          style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.appSettings.enableFloatingButton,
-            onChanged: (value) {
-              appProvider.toggleFloatingButton();
+            onChanged: (value) async {
+              await appProvider.toggleFloatingButton();
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value ? '已开启悬浮按钮' : '已关闭悬浮按钮'),
+                  backgroundColor: AppConstants.successColor,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
             },
           ),
           
@@ -1309,9 +1371,16 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: Text('操作时提供触觉反馈',
                          style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.appSettings.enableHapticFeedback,
-            onChanged: (value) {
+            onChanged: (value) async {
               final newSettings = appProvider.appSettings.copyWith(enableHapticFeedback: value);
-              appProvider.updateAppSettings(newSettings);
+              await appProvider.updateAppSettings(newSettings);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value ? '已开启触觉反馈' : '已关闭触觉反馈'),
+                  backgroundColor: AppConstants.successColor,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
             },
           ),
           
@@ -1322,9 +1391,16 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: Text('系统启动时自动运行应用',
                          style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.appSettings.enableAutoStart,
-            onChanged: (value) {
+            onChanged: (value) async {
               final newSettings = appProvider.appSettings.copyWith(enableAutoStart: value);
-              appProvider.updateAppSettings(newSettings);
+              await appProvider.updateAppSettings(newSettings);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value ? '已开启开机自启' : '已关闭开机自启'),
+                  backgroundColor: AppConstants.successColor,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
             },
           ),
         ],
@@ -1366,9 +1442,16 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: Text('允许收集使用数据用于改进服务',
                          style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.privacySettings.enableDataCollection,
-            onChanged: (value) {
+            onChanged: (value) async {
               final newSettings = appProvider.privacySettings.copyWith(enableDataCollection: value);
-              appProvider.updatePrivacySettings(newSettings);
+              await appProvider.updatePrivacySettings(newSettings);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value ? '已允许数据收集' : '已禁止数据收集'),
+                  backgroundColor: AppConstants.successColor,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
             },
           ),
           
@@ -1379,9 +1462,16 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: Text('允许发送匿名的使用统计数据',
                          style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.privacySettings.enableAnalytics,
-            onChanged: (value) {
+            onChanged: (value) async {
               final newSettings = appProvider.privacySettings.copyWith(enableAnalytics: value);
-              appProvider.updatePrivacySettings(newSettings);
+              await appProvider.updatePrivacySettings(newSettings);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value ? '已开启统计分析' : '已关闭统计分析'),
+                  backgroundColor: AppConstants.successColor,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
             },
           ),
           
@@ -1392,9 +1482,16 @@ class _SettingsPageState extends State<SettingsPage> {
             subtitle: Text('自动发送崩溃报告帮助改进应用',
                          style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.privacySettings.enableCrashReporting,
-            onChanged: (value) {
+            onChanged: (value) async {
               final newSettings = appProvider.privacySettings.copyWith(enableCrashReporting: value);
-              appProvider.updatePrivacySettings(newSettings);
+              await appProvider.updatePrivacySettings(newSettings);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(value ? '已开启崩溃报告' : '已关闭崩溃报告'),
+                  backgroundColor: AppConstants.successColor,
+                  duration: const Duration(seconds: 1),
+                ),
+              );
             },
           ),
         ],
@@ -1478,18 +1575,6 @@ class _SettingsPageState extends State<SettingsPage> {
         return '浅色模式';
       case ThemeMode.dark:
         return '深色模式';
-    }
-  }
-
-  /// 获取语言文本
-  String _getLanguageText(String language) {
-    switch (language) {
-      case 'zh_CN':
-        return '简体中文';
-      case 'en_US':
-        return 'English';
-      default:
-        return '简体中文';
     }
   }
 
