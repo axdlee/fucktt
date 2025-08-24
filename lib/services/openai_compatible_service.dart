@@ -56,10 +56,17 @@ class OpenAICompatibleService implements AIService {
       final model = modelId ?? _getDefaultModel();
       final request = _buildChatRequest(prompt, model, parameters);
       
+      // 调试日志：打印请求信息
+      print('🚀 AI请求: ${_provider.name}');
+      print('🎯 模型: $model');
+      print('📦 请求URL: ${_provider.baseUrl}/chat/completions');
+      
       final response = await _dio.post('/chat/completions', data: request);
       
       if (response.statusCode == 200) {
-        return _parseResponse(response.data, model);
+        final result = _parseResponse(response.data, model);
+        print('✅ AI响应成功: ${result.content.length}字符');
+        return result;
       } else {
         throw AIServiceException(
           'API请求失败: ${response.statusCode}',
@@ -67,11 +74,16 @@ class OpenAICompatibleService implements AIService {
         );
       }
     } on DioException catch (e) {
+      print('❌ AI请求失败: ${_handleDioError(e)}');
+      if (e.response?.data != null) {
+        print('❌ 错误响应: ${e.response!.data}');
+      }
       throw AIServiceException(
         _handleDioError(e),
         code: e.response?.statusCode.toString(),
       );
     } catch (e) {
+      print('❌ AI请求异常: $e');
       throw AIServiceException('请求失败: $e');
     }
   }
@@ -172,10 +184,17 @@ class OpenAICompatibleService implements AIService {
         return 'gpt-3.5-turbo';
       case 'deepseek':
         return 'deepseek-chat';
+      case 'siliconflow':
+        return 'deepseek-ai/DeepSeek-V2.5'; // SiliconFlow支持的模型
       case 'alibaba':
+      case 'qwen':
         return 'qwen-turbo';
       case 'baidu':
         return 'ernie-bot-turbo';
+      case 'anthropic':
+        return 'claude-3-haiku-20240307';
+      case 'google':
+        return 'gemini-pro';
       default:
         return 'gpt-3.5-turbo';
     }

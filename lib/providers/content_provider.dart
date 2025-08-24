@@ -93,7 +93,7 @@ class ContentProvider extends ChangeNotifier {
     
     _categoryStats.clear();
     for (final result in _analysisHistory) {
-      final contentType = result.contentType.toString();
+      final contentType = _getContentTypeName(result.contentType);
       _categoryStats[contentType] = (_categoryStats[contentType] ?? 0) + 1;
     }
   }
@@ -107,6 +107,7 @@ class ContentProvider extends ChangeNotifier {
     String? authorName,
     ValuesProvider? valuesProvider,
     AIProvider? aiProvider,
+    Map<String, dynamic>? customAIParams, // 新增自定AI参数
   }) async {
     _isAnalyzing = true;
     notifyListeners();
@@ -127,7 +128,11 @@ class ContentProvider extends ChangeNotifier {
       
       if (aiProvider != null && aiProvider.hasAvailableServices) {
         try {
-          final aiResult = await _performAIAnalysis(content, valuesProvider);
+          final aiResult = await _performAIAnalysis(
+            content, 
+            valuesProvider,
+            customAIParams, // 传递自定AI参数
+          );
           if (aiResult != null) {
             aiScore = (aiResult['overallScore'] ?? localScore).toDouble();
             
@@ -213,6 +218,7 @@ class ContentProvider extends ChangeNotifier {
   Future<Map<String, dynamic>?> _performAIAnalysis(
     String content,
     ValuesProvider? valuesProvider,
+    Map<String, dynamic>? customAIParams, // 新增参数
   ) async {
     try {
       // 构建分析提示词
@@ -247,7 +253,13 @@ $userValues
   "riskLevel": "low"
 }''';
 
-      final response = await _aiManager.executeRequest(prompt: prompt);
+      // 使用自定义AI参数执行请求
+      final response = await _aiManager.executeRequest(
+        prompt: prompt,
+        providerId: customAIParams?['providerId'],
+        modelId: customAIParams?['modelId'],
+        parameters: customAIParams,
+      );
       
       if (response.success == true) {
         // 尝试解析JSON响应
@@ -380,6 +392,24 @@ $userValues
     await _loadRecentBehaviors();
     await _calculateStatistics();
     notifyListeners();
+  }
+
+  /// 获取内容类型的友好名称
+  String _getContentTypeName(ContentType type) {
+    switch (type) {
+      case ContentType.article:
+        return '文章';
+      case ContentType.comment:
+        return '评论';
+      case ContentType.video:
+        return '视频';
+      case ContentType.image:
+        return '图片';
+      case ContentType.author:
+        return '作者信息';
+      case ContentType.advertisement:
+        return '广告';
+    }
   }
 
   /// 记录用户反馈

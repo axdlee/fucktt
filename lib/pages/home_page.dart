@@ -26,29 +26,36 @@ class _HomePageState extends State<HomePage> {
   @override
   void initState() {
     super.initState();
-    _initializeProviders();
+    // 延迟初始化，避免在build期间调用setState
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeProviders();
+    });
   }
 
   Future<void> _initializeProviders() async {
-    final appProvider = context.read<AppProvider>();
-    final aiProvider = context.read<AIProvider>();
-    final valuesProvider = context.read<ValuesProvider>();
-    final contentProvider = context.read<ContentProvider>();
+    try {
+      final appProvider = context.read<AppProvider>();
+      final aiProvider = context.read<AIProvider>();
+      final valuesProvider = context.read<ValuesProvider>();
+      final contentProvider = context.read<ContentProvider>();
 
-    if (!appProvider.isInitialized) {
-      await appProvider.initialize();
-    }
-    
-    if (!aiProvider.isInitialized) {
-      await aiProvider.initialize();
-    }
-    
-    if (!valuesProvider.isInitialized) {
-      await valuesProvider.initialize();
-    }
-    
-    if (!contentProvider.isInitialized) {
-      await contentProvider.initialize();
+      if (!appProvider.isInitialized) {
+        await appProvider.initialize();
+      }
+      
+      if (!aiProvider.isInitialized) {
+        await aiProvider.initialize();
+      }
+      
+      if (!valuesProvider.isInitialized) {
+        await valuesProvider.initialize();
+      }
+      
+      if (!contentProvider.isInitialized) {
+        await contentProvider.initialize();
+      }
+    } catch (e) {
+      print('Provider初始化失败: $e');
     }
   }
 

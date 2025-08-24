@@ -8,6 +8,7 @@ import '../providers/values_provider.dart';
 import '../providers/ai_provider.dart';
 import '../models/behavior_model.dart';
 import '../widgets/app_card.dart';
+import '../widgets/ai_model_selector.dart';
 
 /// 价值观过滤模拟测试页面
 /// 用于测试完整的内容分析和过滤流程
@@ -21,6 +22,10 @@ class FilterSimulationPage extends StatefulWidget {
 class _FilterSimulationPageState extends State<FilterSimulationPage> {
   final TextEditingController _contentController = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  
+  // AI模型选择状态
+  String? _selectedProviderId;
+  String? _selectedModelId;
   
   // 模拟的今日头条内容样本
   final List<Map<String, String>> _sampleContents = [
@@ -83,6 +88,10 @@ class _FilterSimulationPageState extends State<FilterSimulationPage> {
             
             // 内容输入区域
             _buildContentInputSection(),
+            SizedBox(height: 24.h),
+            
+            // AI模型选择
+            _buildAIModelSelection(),
             SizedBox(height: 24.h),
             
             // 样本内容选择
@@ -624,7 +633,7 @@ class _FilterSimulationPageState extends State<FilterSimulationPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _buildDetailRow('内容类型', result.contentType.name),
+              _buildDetailRow('内容类型', _getContentTypeName(result.contentType)),
               _buildDetailRow('分析时间', result.analyzedAt.toString().substring(0, 19)),
               _buildDetailRow('AI模型', result.aiProviderId.isNotEmpty ? result.aiProviderId : '本地分析'),
               if (result.extractedTopics.isNotEmpty)
@@ -744,13 +753,18 @@ class _FilterSimulationPageState extends State<FilterSimulationPage> {
         ),
       );
 
-      // 执行内容分析
+      // 执行内容分析，使用选定的AI模型
       final result = await contentProvider.analyzeContent(
         content: content,
         contentType: ContentType.article,
         contentId: DateTime.now().millisecondsSinceEpoch.toString(),
         valuesProvider: valuesProvider,
         aiProvider: aiProvider,
+        // 传递选定的AI模型参数
+        customAIParams: {
+          if (_selectedProviderId != null) 'providerId': _selectedProviderId,
+          if (_selectedModelId != null) 'modelId': _selectedModelId,
+        },
       );
 
       if (result != null) {
@@ -785,6 +799,61 @@ class _FilterSimulationPageState extends State<FilterSimulationPage> {
         ),
       );
     }
+  }
+
+  /// 获取内容类型的友好名称
+  String _getContentTypeName(ContentType type) {
+    switch (type) {
+      case ContentType.article:
+        return '文章';
+      case ContentType.comment:
+        return '评论';
+      case ContentType.video:
+        return '视频';
+      case ContentType.image:
+        return '图片';
+      case ContentType.author:
+        return '作者信息';
+      case ContentType.advertisement:
+        return '广告';
+    }
+  }
+
+  /// 构建AI模型选择区域
+  Widget _buildAIModelSelection() {
+    return AppCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            '🤖 AI模型选择',
+            style: TextStyle(
+              fontSize: 16.sp,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Text(
+            '选择用于内容分析的AI服务和模型：',
+            style: TextStyle(
+              fontSize: 14.sp,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
+          SizedBox(height: 12.h),
+          AIModelSelector(
+            selectedProviderId: _selectedProviderId,
+            selectedModelId: _selectedModelId,
+            onModelChanged: (providerId, modelId) {
+              setState(() {
+                _selectedProviderId = providerId;
+                _selectedModelId = modelId;
+              });
+            },
+          ),
+        ],
+      ),
+    );
   }
 
   String _getActionText(FilterAction action) {
