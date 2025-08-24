@@ -174,18 +174,25 @@ class OpenAICompatibleService implements AIService {
   }
 
   String _getDefaultModel() {
+    // 优先使用配置的模型
     if (_provider.supportedModels.isNotEmpty) {
       return _provider.supportedModels.first.modelId;
     }
     
     // 根据服务商返回默认模型
-    switch (_provider.name.toLowerCase()) {
+    final providerName = _provider.name.toLowerCase();
+    final baseUrl = _provider.baseUrl.toLowerCase();
+    
+    // SiliconFlow服务识别
+    if (providerName.contains('siliconflow') || baseUrl.contains('siliconflow')) {
+      return 'deepseek-ai/DeepSeek-V2.5';
+    }
+    
+    switch (providerName) {
       case 'openai':
         return 'gpt-3.5-turbo';
       case 'deepseek':
         return 'deepseek-chat';
-      case 'siliconflow':
-        return 'deepseek-ai/DeepSeek-V2.5'; // SiliconFlow支持的模型
       case 'alibaba':
       case 'qwen':
         return 'qwen-turbo';
@@ -196,6 +203,16 @@ class OpenAICompatibleService implements AIService {
       case 'google':
         return 'gemini-pro';
       default:
+        // 检查其他服务的URL标识
+        if (baseUrl.contains('openai')) {
+          return 'gpt-3.5-turbo';
+        } else if (baseUrl.contains('deepseek')) {
+          return 'deepseek-chat';
+        } else if (baseUrl.contains('anthropic')) {
+          return 'claude-3-haiku-20240307';
+        }
+        
+        // 最后的兜底策略：不返回"default"，而是常见模型
         return 'gpt-3.5-turbo';
     }
   }
