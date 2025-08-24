@@ -4,6 +4,7 @@ import '../models/prompt_template_model.dart';
 import 'storage_service.dart';
 import 'ai_service_interface.dart';
 import 'openai_compatible_service.dart';
+import 'ai_simulation_service.dart';
 
 /// AI服务管理器 - 统一管理所有AI服务提供商
 class AIServiceManager {
@@ -40,9 +41,14 @@ class AIServiceManager {
 
   /// 创建AI服务实例
   AIService _createService(AIProviderModel provider) {
-    // 目前主要支持OpenAI兼容的服务
-    // 未来可以根据provider.name添加其他类型的服务
-    return OpenAICompatibleService(provider);
+    // 根据provider的类型创建对应的服务
+    switch (provider.name.toLowerCase()) {
+      case 'simulation':
+        return AISimulationService();
+      default:
+        // 默认使用OpenAI兼容的服务
+        return OpenAICompatibleService(provider);
+    }
   }
 
   /// 获取AI服务

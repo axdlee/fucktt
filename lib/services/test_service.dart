@@ -11,7 +11,7 @@ class TestService {
   static const String testUserId = 'test_user';
   
   /// 测试结果模型
-  static List<TestResult> _testResults = [];
+  static final List<TestResult> _testResults = [];
   
   /// 获取所有测试结果
   static List<TestResult> get testResults => List.unmodifiable(_testResults);

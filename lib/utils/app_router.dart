@@ -5,6 +5,7 @@ import '../pages/home_page.dart';
 import '../pages/values_config_page.dart';
 import '../pages/ai_config_page.dart';
 import '../pages/test_page.dart';
+import '../pages/filter_simulation_page.dart';
 import '../pages/placeholder_pages.dart';
 import '../constants/app_constants.dart';
 
@@ -66,6 +67,13 @@ class AppRouter {
         path: AppRoutes.test,
         name: 'test',
         builder: (context, state) => const TestPage(),
+      ),
+      
+      // 价值观过滤模拟测试页面
+      GoRoute(
+        path: AppRoutes.filterSimulation,
+        name: 'filter-simulation',
+        builder: (context, state) => const FilterSimulationPage(),
       ),
     ],
     

@@ -22,7 +22,7 @@ class ContentProvider extends ChangeNotifier {
   int _totalAnalyzed = 0;
   int _totalBlocked = 0;
   int _totalWarned = 0;
-  Map<String, int> _categoryStats = {};
+  final Map<String, int> _categoryStats = {};
 
   // Getters
   List<ContentAnalysisResult> get analysisHistory => List.unmodifiable(_analysisHistory);
@@ -423,8 +423,4 @@ $userValues
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

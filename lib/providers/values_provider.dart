@@ -502,8 +502,4 @@ class ValuesProvider extends ChangeNotifier {
     }
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

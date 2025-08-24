@@ -118,6 +118,7 @@ class AppRoutes {
   static const String about = '/about';
   static const String feedback = '/feedback';
   static const String test = '/test';
+  static const String filterSimulation = '/filter-simulation';
 }
 
 // 权限类型

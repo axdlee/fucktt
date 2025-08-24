@@ -669,7 +669,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('AI服务\"${provider.displayName}\"${_isEditMode ? "更新" : "添加"}成功'),
+            content: Text('AI服务"${provider.displayName}"${_isEditMode ? "更新" : "添加"}成功'),
             backgroundColor: AppConstants.successColor,
           ),
         );

@@ -354,7 +354,13 @@ class _HomePageState extends State<HomePage> {
             SizedBox(width: 12.w),
             
             Expanded(
-              child: Container(), // 占位符保持对称
+              child: QuickActionButton(
+                icon: Icons.psychology,
+                title: '🔥 模拟测试',
+                subtitle: '价值观过滤测试',
+                color: Colors.deepOrange,
+                onTap: () => context.push(AppRoutes.filterSimulation),
+              ),
             ),
           ],
         ),

@@ -41,6 +41,13 @@ class AIProvider extends ChangeNotifier {
     try {
       await _serviceManager.initialize();
       await _loadProviders();
+      
+      // 如果没有任何AI服务，自动添加模拟服务
+      if (_providers.isEmpty || !_providers.any((p) => p.enabled)) {
+        await _addSimulationService();
+        await _loadProviders();
+      }
+      
       await _updateHealthStatus();
       
       // 开始定期健康检查
@@ -52,6 +59,33 @@ class AIProvider extends ChangeNotifier {
       _setError('AI服务初始化失败: $e');
     } finally {
       _setLoading(false);
+    }
+  }
+
+  /// 添加模拟AI服务（用于测试和演示）
+  Future<void> _addSimulationService() async {
+    final simulationProvider = AIProviderModel(
+      id: 'simulation',
+      name: 'simulation',
+      displayName: '模拟AI服务',
+      baseUrl: 'mock://simulation',
+      apiKey: 'mock-key',
+      supportedModels: [
+        ModelConfig(modelId: 'simulation-model', displayName: 'Mock AI Model'),
+        ModelConfig(modelId: 'test-model', displayName: 'Test Model'),
+      ],
+      enabled: true,
+      description: '用于测试和演示的模拟AI服务，无需API密钥',
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+      priority: 99, // 最低优先级
+    );
+    
+    try {
+      await _serviceManager.addProvider(simulationProvider);
+      print('✅ 已自动添加模拟AI服务用于测试');
+    } catch (e) {
+      print('⚠️ 添加模拟AI服务失败: $e');
     }
   }
 
