@@ -7,6 +7,7 @@ import '../pages/ai_config_page.dart';
 import '../pages/test_page.dart';
 import '../pages/filter_simulation_page.dart';
 import '../pages/placeholder_pages.dart';
+import '../pages/ocr_config_page.dart';
 import '../constants/app_constants.dart';
 
 class AppRouter {
@@ -74,6 +75,13 @@ class AppRouter {
         path: AppRoutes.filterSimulation,
         name: 'filter-simulation',
         builder: (context, state) => const FilterSimulationPage(),
+      ),
+      
+      // OCR服务配置页面
+      GoRoute(
+        path: AppRoutes.ocrConfig,
+        name: 'ocr-config',
+        builder: (context, state) => const OCRConfigPage(),
       ),
     ],
     

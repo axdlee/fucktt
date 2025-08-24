@@ -1,7 +1,10 @@
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:flutter/services.dart';
 
+import 'ocr_service_manager.dart';
+
 /// OCR文本识别服务
+/// 现在作为OCRServiceManager的包装器，保持向后兼容
 class OCRService {
   static OCRService? _instance;
   static OCRService get instance => _instance ??= OCRService._();
@@ -11,17 +14,23 @@ class OCRService {
   late final TextRecognizer _textRecognizer;
   bool _isInitialized = false;
   
+  // 新增：使用统一的OCR服务管理器
+  final OCRServiceManager _manager = OCRServiceManager.instance;
+  
   /// 初始化OCR服务
   Future<void> initialize() async {
     if (_isInitialized) return;
     
     try {
+      // 优先尝试初始化Google ML Kit
       _textRecognizer = TextRecognizer(script: TextRecognitionScript.chinese);
       _isInitialized = true;
-      print('OCR服务初始化成功');
+      print('✅ Google ML Kit OCR服务初始化成功');
     } catch (e) {
-      print('OCR服务初始化失败: $e');
-      throw Exception('OCR服务初始化失败');
+      print('⚠️ Google ML Kit OCR服务初始化失败: $e');
+      print('💡 这在国内是正常现象，将使用国产OCR服务作为替代');
+      _isInitialized = false;
+      throw Exception('Google ML Kit OCR服务初始化失败');
     }
   }
   

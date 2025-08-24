@@ -114,6 +114,7 @@ class AppRoutes {
   static const String home = '/';
   static const String values = '/values';
   static const String aiConfig = '/ai-config';
+  static const String ocrConfig = '/ocr-config';
   static const String prompts = '/prompts';
   static const String settings = '/settings';
   static const String filterHistory = '/filter-history';
