@@ -14,6 +14,8 @@
 .vscode-test-server-oss/
 .kilo/
 .qoder/
+.crush/
+.spec-workflow/
 .vim/
 .dart/
 .dart_tool/
@@ -26,3 +28,4 @@
 .rustup-toolchain-installer-cache-lock-file/
 .rustup-toolchain-installer-cache-lock-file-lock/
 build/
+.aider*
