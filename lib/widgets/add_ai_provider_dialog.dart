@@ -7,12 +7,11 @@ import '../models/ai_provider_model.dart';
 import '../providers/ai_provider.dart';
 import '../constants/app_constants.dart';
 import '../services/openai_compatible_service.dart';
-import 'ai_model_selector.dart';
 
 /// 添加AI服务提供商对话框
 class AddAIProviderDialog extends StatefulWidget {
   final AIProviderModel? editProvider; // 编辑模式下的提供商
-  
+
   const AddAIProviderDialog({super.key, this.editProvider});
 
   @override
@@ -25,13 +24,13 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
   final _apiKeyController = TextEditingController();
   final _baseUrlController = TextEditingController();
   final _descriptionController = TextEditingController();
-  
+
   String _selectedProvider = '';
   int _priority = 1;
   bool _isTesting = false;
   bool _isPasswordVisible = false;
   bool get _isEditMode => widget.editProvider != null;
-  
+
   // 模型选择相关状态
   String? _selectedModelId;
   List<ModelConfig> _availableModels = [];
@@ -41,47 +40,50 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
   @override
   void initState() {
     super.initState();
-    
+
     // 确保_selectedProvider的初始值是有效的
     final supportedProviders = AppConstants.supportedAIProviders.keys.toList();
-    _selectedProvider = supportedProviders.isNotEmpty ? supportedProviders.first : 'openai';
-    
+    _selectedProvider =
+        supportedProviders.isNotEmpty ? supportedProviders.first : 'openai';
+
     if (_isEditMode) {
       _initForEdit();
     } else {
       _updateProviderDefaults();
     }
   }
-  
+
   void _initForEdit() {
     final provider = widget.editProvider!;
     _nameController.text = provider.displayName;
     _apiKeyController.text = provider.apiKey;
     _baseUrlController.text = provider.baseUrl;
     _descriptionController.text = provider.description ?? '';
-    
+
     // 确保 provider.name 在支持列表中
     final providerName = provider.name.toLowerCase();
     if (AppConstants.supportedAIProviders.containsKey(providerName)) {
       _selectedProvider = providerName;
     } else {
       // 如果不在支持列表中，使用custom或第一个可用的
-      _selectedProvider = AppConstants.supportedAIProviders.containsKey('custom') 
-          ? 'custom' 
-          : AppConstants.supportedAIProviders.keys.first;
+      _selectedProvider =
+          AppConstants.supportedAIProviders.containsKey('custom')
+              ? 'custom'
+              : AppConstants.supportedAIProviders.keys.first;
     }
-    
+
     // 确保优先级值在有效范围内（1-10）
     _priority = provider.priority.clamp(1, 10);
-    
+
     // 关键修复：初始化当前配置的模型
     if (provider.supportedModels.isNotEmpty) {
       _selectedModelId = provider.supportedModels.first.modelId;
-      print('🎯 编辑模式：设置当前模型为 ${_selectedModelId}');
+      print('🎯 编辑模式：设置当前模型为 $_selectedModelId');
     }
-    
+
     // 编辑模式下，如果有API密钥和基础URL，显示模型选择器
-    if (_apiKeyController.text.trim().isNotEmpty && _baseUrlController.text.trim().isNotEmpty) {
+    if (_apiKeyController.text.trim().isNotEmpty &&
+        _baseUrlController.text.trim().isNotEmpty) {
       _showModelSelector = true;
       // 延迟加载模型列表，但保持当前选择
       WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -112,7 +114,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
           children: [
             // 标题栏
             _buildTitleBar(),
-            
+
             // 表单内容
             Flexible(
               child: SingleChildScrollView(
@@ -124,9 +126,9 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                     children: [
                       // 服务商选择
                       _buildProviderSelector(),
-                      
+
                       SizedBox(height: 16.h),
-                      
+
                       // 显示名称
                       _buildTextField(
                         controller: _nameController,
@@ -139,9 +141,9 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                           return null;
                         },
                       ),
-                      
+
                       SizedBox(height: 16.h),
-                      
+
                       // API密钥
                       _buildTextField(
                         controller: _apiKeyController,
@@ -156,21 +158,23 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                         },
                         onChanged: (value) {
                           // API密钥变化时，自动拉取模型列表
-                          if (value.trim().isNotEmpty && _baseUrlController.text.trim().isNotEmpty) {
+                          if (value.trim().isNotEmpty &&
+                              _baseUrlController.text.trim().isNotEmpty) {
                             setState(() {
                               _showModelSelector = true;
                             });
                             _loadModelsAfterDelay();
                           } else {
                             setState(() {
-                              _showModelSelector = value.trim().isNotEmpty && _baseUrlController.text.trim().isNotEmpty;
+                              _showModelSelector = value.trim().isNotEmpty &&
+                                  _baseUrlController.text.trim().isNotEmpty;
                             });
                           }
                         },
                       ),
-                      
+
                       SizedBox(height: 16.h),
-                      
+
                       // 基础URL
                       _buildTextField(
                         controller: _baseUrlController,
@@ -188,34 +192,36 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                         },
                         onChanged: (value) {
                           // 基础URL变化时，自动拉取模型列表
-                          if (value.trim().isNotEmpty && _apiKeyController.text.trim().isNotEmpty) {
+                          if (value.trim().isNotEmpty &&
+                              _apiKeyController.text.trim().isNotEmpty) {
                             setState(() {
                               _showModelSelector = true;
                             });
                             _loadModelsAfterDelay();
                           } else {
                             setState(() {
-                              _showModelSelector = value.trim().isNotEmpty && _apiKeyController.text.trim().isNotEmpty;
+                              _showModelSelector = value.trim().isNotEmpty &&
+                                  _apiKeyController.text.trim().isNotEmpty;
                             });
                           }
                         },
                       ),
-                      
+
                       SizedBox(height: 16.h),
-                      
+
                       // 模型选择器
                       if (_showModelSelector) ...[
                         _buildModelSelector(),
                         SizedBox(height: 16.h),
                       ],
-                      
+
                       SizedBox(height: 16.h),
-                      
+
                       // 优先级
                       _buildPrioritySlider(),
-                      
+
                       SizedBox(height: 16.h),
-                      
+
                       // 描述
                       _buildTextField(
                         controller: _descriptionController,
@@ -223,9 +229,9 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                         hint: '简要描述这个AI服务的用途',
                         maxLines: 2,
                       ),
-                      
+
                       SizedBox(height: 24.h),
-                      
+
                       // 操作按钮
                       _buildActionButtons(),
                     ],
@@ -289,9 +295,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             color: AppConstants.textPrimaryColor,
           ),
         ),
-        
         SizedBox(height: 8.h),
-        
         Container(
           width: double.infinity,
           padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 4.h),
@@ -364,9 +368,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             color: AppConstants.textPrimaryColor,
           ),
         ),
-        
         SizedBox(height: 8.h),
-        
         TextFormField(
           controller: controller,
           maxLines: maxLines,
@@ -383,11 +385,14 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
               borderRadius: BorderRadius.circular(8.r),
               borderSide: BorderSide(color: AppConstants.primaryColor),
             ),
-            contentPadding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
-            suffixIcon: obscureText 
+            contentPadding:
+                EdgeInsets.symmetric(horizontal: 12.w, vertical: 12.h),
+            suffixIcon: obscureText
                 ? IconButton(
                     icon: Icon(
-                      _isPasswordVisible ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      _isPasswordVisible
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       size: 20.sp,
                     ),
                     onPressed: () {
@@ -429,13 +434,12 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             ),
           ],
         ),
-        
         SizedBox(height: 8.h),
-        
         SliderTheme(
           data: SliderTheme.of(context).copyWith(
             activeTrackColor: AppConstants.primaryColor,
-            inactiveTrackColor: AppConstants.primaryColor.withValues(alpha: 0.2),
+            inactiveTrackColor:
+                AppConstants.primaryColor.withValues(alpha: 0.2),
             thumbColor: AppConstants.primaryColor,
             overlayColor: AppConstants.primaryColor.withValues(alpha: 0.1),
             trackHeight: 4.h,
@@ -453,7 +457,6 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             },
           ),
         ),
-        
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -486,7 +489,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
           width: double.infinity,
           child: OutlinedButton.icon(
             onPressed: _isTesting ? null : _testConnection,
-            icon: _isTesting 
+            icon: _isTesting
                 ? SizedBox(
                     width: 16.w,
                     height: 16.w,
@@ -500,9 +503,9 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             ),
           ),
         ),
-        
+
         SizedBox(height: 16.h),
-        
+
         // 底部按钮组
         Row(
           children: [
@@ -522,9 +525,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                 ),
               ),
             ),
-            
             SizedBox(width: 16.w),
-            
             Expanded(
               child: ElevatedButton(
                 onPressed: _addProvider,
@@ -555,7 +556,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     _nameController.text = defaults['name'] ?? '';
     _baseUrlController.text = defaults['baseUrl'] ?? '';
     _descriptionController.text = defaults['description'] ?? '';
-    
+
     // 如果基础URL不为空，设置显示模型选择器（不调用setState）
     if (_baseUrlController.text.trim().isNotEmpty) {
       _showModelSelector = true;
@@ -663,17 +664,20 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
   /// 构建模型下拉列表项
   List<DropdownMenuItem<String>> _buildModelDropdownItems() {
     final List<ModelConfig> allModels = List.from(_availableModels);
-    
+
     // 在编辑模式下，如果当前选中的模型不在API列表中，添加它
-    if (_isEditMode && _selectedModelId != null && 
+    if (_isEditMode &&
+        _selectedModelId != null &&
         !_availableModels.any((m) => m.modelId == _selectedModelId)) {
-      allModels.insert(0, ModelConfig(
-        modelId: _selectedModelId!,
-        displayName: _selectedModelId!,
-        description: '当前配置的模型',
-      ));
+      allModels.insert(
+          0,
+          ModelConfig(
+            modelId: _selectedModelId!,
+            displayName: _selectedModelId!,
+            description: '当前配置的模型',
+          ));
     }
-    
+
     return allModels.map((model) {
       return DropdownMenuItem<String>(
         value: model.modelId,
@@ -685,7 +689,9 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
               children: [
                 Expanded(
                   child: Text(
-                    model.displayName.isNotEmpty ? model.displayName : model.modelId,
+                    model.displayName.isNotEmpty
+                        ? model.displayName
+                        : model.modelId,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
@@ -693,10 +699,12 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
                   ),
                 ),
                 // 在编辑模式下，如果是当前配置的模型但不在API列表中，显示标识
-                if (_isEditMode && _selectedModelId == model.modelId && 
+                if (_isEditMode &&
+                    _selectedModelId == model.modelId &&
                     !_availableModels.any((m) => m.modelId == _selectedModelId))
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
+                    padding:
+                        EdgeInsets.symmetric(horizontal: 4.w, vertical: 1.h),
                     decoration: BoxDecoration(
                       color: AppConstants.primaryColor.withOpacity(0.2),
                       borderRadius: BorderRadius.circular(4.r),
@@ -745,7 +753,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             ),
             IconButton(
               onPressed: _isLoadingModels ? null : _loadAvailableModels,
-              icon: _isLoadingModels 
+              icon: _isLoadingModels
                   ? SizedBox(
                       width: 16.w,
                       height: 16.w,
@@ -756,10 +764,9 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             ),
           ],
         ),
-        
         SizedBox(height: 8.h),
-        
-        if (_availableModels.isNotEmpty || (_isEditMode && _selectedModelId != null)) ...[
+        if (_availableModels.isNotEmpty ||
+            (_isEditMode && _selectedModelId != null)) ...[
           Container(
             decoration: BoxDecoration(
               color: Colors.white,
@@ -793,7 +800,8 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             decoration: BoxDecoration(
               color: AppConstants.warningColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: AppConstants.warningColor.withOpacity(0.3)),
+              border:
+                  Border.all(color: AppConstants.warningColor.withOpacity(0.3)),
             ),
             child: Row(
               children: [
@@ -835,7 +843,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
   Future<void> _loadAvailableModels() async {
     final apiKey = _apiKeyController.text.trim();
     final baseUrl = _baseUrlController.text.trim();
-    
+
     if (apiKey.isEmpty || baseUrl.isEmpty) {
       setState(() {
         _showModelSelector = false;
@@ -862,35 +870,37 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       );
-      
+
       // 直接创建OpenAI兼容服务
       final tempService = OpenAICompatibleService(tempProvider);
-      
+
       print('🔍 开始获取模型列表: ${tempProvider.baseUrl}');
       final models = await tempService.getAvailableModels();
       print('✅ 成功获取${models.length}个模型');
-      
+
       if (mounted) {
         setState(() {
           _availableModels = models;
           // 在编辑模式下，保持当前模型选择（如果存在于新列表中）
           if (_isEditMode && _selectedModelId != null) {
             // 检查当前模型是否在新获取的列表中
-            final modelExists = models.any((m) => m.modelId == _selectedModelId);
+            final modelExists =
+                models.any((m) => m.modelId == _selectedModelId);
             if (!modelExists) {
-              print('⚠️ 当前模型 ${_selectedModelId} 不在API返回的列表中，保持原选择');
+              print('⚠️ 当前模型 $_selectedModelId 不在API返回的列表中，保持原选择');
               // 在编辑模式下，即使模型不在新列表中，也保持当前选择
               // 不清空 _selectedModelId
             } else {
-              print('✅ 当前模型 ${_selectedModelId} 在API列表中，保持选中');
+              print('✅ 当前模型 $_selectedModelId 在API列表中，保持选中');
             }
-          } else if (!_isEditMode && _selectedModelId != null && 
-                     !models.any((m) => m.modelId == _selectedModelId)) {
+          } else if (!_isEditMode &&
+              _selectedModelId != null &&
+              !models.any((m) => m.modelId == _selectedModelId)) {
             // 非编辑模式下，如果当前选中的模型不在列表中，清空选择
             _selectedModelId = null;
           }
         });
-        
+
         // 显示成功消息
         if (models.isNotEmpty) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -902,10 +912,9 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
           );
         }
       }
-      
+
       // 清理临时服务
       tempService.dispose();
-      
     } catch (e) {
       print('❌ 获取模型列表失败: $e');
       if (mounted) {
@@ -913,7 +922,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
           _availableModels.clear();
           _selectedModelId = null;
         });
-        
+
         // 显示错误消息
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -944,10 +953,10 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
 
     try {
       final aiProvider = context.read<AIProvider>();
-      
+
       // 创建临时的AI服务提供商进行测试，使用智能模型选择
       AIProviderModel tempProvider;
-      
+
       switch (_selectedProvider) {
         case 'openai':
           tempProvider = aiProvider.createOpenAIProvider(
@@ -972,22 +981,24 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
           );
           break;
       }
-      
+
       // 关键修复：为临时provider设置正确的模型配置
       final effectiveModels = _getEffectiveSupportedModels();
       tempProvider = tempProvider.copyWith(
         supportedModels: effectiveModels,
       );
-      
-      print('🗺️ 测试连接使用模型: ${effectiveModels.isNotEmpty ? effectiveModels.first.modelId : "无模型"}');
-      
+
+      print(
+          '🗺️ 测试连接使用模型: ${effectiveModels.isNotEmpty ? effectiveModels.first.modelId : "无模型"}');
+
       final result = await aiProvider.testProvider(tempProvider);
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(result ? '连接测试成功！' : '连接测试失败，请检查配置信息。'),
-            backgroundColor: result ? AppConstants.successColor : AppConstants.errorColor,
+            backgroundColor:
+                result ? AppConstants.successColor : AppConstants.errorColor,
           ),
         );
       }
@@ -1016,22 +1027,24 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
       final selectedModel = _availableModels
           .where((m) => m.modelId == _selectedModelId)
           .firstOrNull;
-      
+
       if (selectedModel != null) {
         return [selectedModel];
       } else {
         // 如果选中的模型不在列表中，创建一个新的
-        return [ModelConfig(
-          modelId: _selectedModelId!,
-          displayName: _selectedModelId!,
-        )];
+        return [
+          ModelConfig(
+            modelId: _selectedModelId!,
+            displayName: _selectedModelId!,
+          )
+        ];
       }
     }
-    
+
     // 2. 如果有从 API 获取的模型列表，选择第一个适合的模型
     if (_availableModels.isNotEmpty) {
       // 对于 SiliconFlow，优先选择 DeepSeek 模型
-      if (_selectedProvider == 'siliconflow' || 
+      if (_selectedProvider == 'siliconflow' ||
           _baseUrlController.text.toLowerCase().contains('siliconflow')) {
         final deepseekModel = _availableModels
             .where((m) => m.modelId.toLowerCase().contains('deepseek'))
@@ -1041,47 +1054,55 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
           return [deepseekModel];
         }
       }
-      
+
       // 否则选择第一个可用模型
       print('🎯 自动选择第一个模型: ${_availableModels.first.modelId}');
       return [_availableModels.first];
     }
-    
+
     // 3. 如果没有获取到模型，使用默认配置
     return _getDefaultModelsForProvider();
   }
-  
+
   /// 获取服务商的默认模型配置
   List<ModelConfig> _getDefaultModelsForProvider() {
     final providerName = _selectedProvider.toLowerCase();
     final baseUrl = _baseUrlController.text.toLowerCase();
-    
+
     if (baseUrl.contains('siliconflow') || providerName == 'siliconflow') {
-      return [ModelConfig(
-        modelId: 'deepseek-ai/DeepSeek-V2.5',
-        displayName: 'DeepSeek-V2.5',
-        description: '深度求索最新模型，综合能力强',
-      )];
+      return [
+        ModelConfig(
+          modelId: 'deepseek-ai/DeepSeek-V2.5',
+          displayName: 'DeepSeek-V2.5',
+          description: '深度求索最新模型，综合能力强',
+        )
+      ];
     } else if (providerName == 'openai' || baseUrl.contains('openai')) {
-      return [ModelConfig(
-        modelId: 'gpt-3.5-turbo',
-        displayName: 'GPT-3.5 Turbo',
-        description: 'OpenAI经典模型，速度快',
-      )];
+      return [
+        ModelConfig(
+          modelId: 'gpt-3.5-turbo',
+          displayName: 'GPT-3.5 Turbo',
+          description: 'OpenAI经典模型，速度快',
+        )
+      ];
     } else if (providerName == 'deepseek' || baseUrl.contains('deepseek')) {
-      return [ModelConfig(
-        modelId: 'deepseek-chat',
-        displayName: 'DeepSeek Chat',
-        description: 'DeepSeek对话模型',
-      )];
+      return [
+        ModelConfig(
+          modelId: 'deepseek-chat',
+          displayName: 'DeepSeek Chat',
+          description: 'DeepSeek对话模型',
+        )
+      ];
     }
-    
+
     // 通用默认
-    return [ModelConfig(
-      modelId: 'gpt-3.5-turbo',
-      displayName: '默认模型',
-      description: '服务商默认AI模型',
-    )];
+    return [
+      ModelConfig(
+        modelId: 'gpt-3.5-turbo',
+        displayName: '默认模型',
+        description: '服务商默认AI模型',
+      )
+    ];
   }
 
   /// 添加服务提供商
@@ -1091,24 +1112,24 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     }
 
     final aiProvider = context.read<AIProvider>();
-    
+
     try {
       AIProviderModel provider;
-      
+
       if (_isEditMode) {
         // 编辑模式：更新现有提供商
         provider = widget.editProvider!.copyWith(
           displayName: _nameController.text.trim(),
           apiKey: _apiKeyController.text.trim(),
           baseUrl: _baseUrlController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty 
-              ? null 
+          description: _descriptionController.text.trim().isEmpty
+              ? null
               : _descriptionController.text.trim(),
           priority: _priority,
           // 确保有正确的模型配置
           supportedModels: _getEffectiveSupportedModels(),
         );
-        
+
         await aiProvider.updateProvider(provider);
       } else {
         // 新增模式：创建新的提供商
@@ -1136,28 +1157,29 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             );
             break;
         }
-        
+
         // 设置自定义配置
         final updatedProvider = provider.copyWith(
           displayName: _nameController.text.trim(),
-          description: _descriptionController.text.trim().isEmpty 
-              ? null 
+          description: _descriptionController.text.trim().isEmpty
+              ? null
               : _descriptionController.text.trim(),
           priority: _priority,
           // 确保有正确的模型配置
           supportedModels: _getEffectiveSupportedModels(),
         );
-        
+
         // 添加到Provider
         await aiProvider.addProvider(updatedProvider);
         provider = updatedProvider;
       }
-      
+
       if (mounted) {
         Navigator.of(context).pop();
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('AI服务"${provider.displayName}"${_isEditMode ? "更新" : "添加"}成功'),
+            content: Text(
+                'AI服务"${provider.displayName}"${_isEditMode ? "更新" : "添加"}成功'),
             backgroundColor: AppConstants.successColor,
           ),
         );

@@ -7,7 +7,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../constants/app_constants.dart';
 import '../providers/app_provider.dart';
 import '../widgets/app_card.dart';
-import '../models/user_config_model.dart';
 
 class PromptManagementPage extends StatefulWidget {
   const PromptManagementPage({super.key});
@@ -88,7 +87,7 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
         }
         return copy;
       }).toList();
-      
+
       await prefs.setString('prompt_templates', json.encode(templatesForSave));
     } catch (e) {
       print('保存Prompt模板失败: $e');
@@ -116,9 +115,9 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
           children: [
             // 统计信息
             _buildStatsSection(),
-            
+
             SizedBox(height: 16.h),
-            
+
             // Prompt模板列表
             _buildPromptsList(),
           ],
@@ -129,9 +128,10 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
 
   /// 构建统计信息区域
   Widget _buildStatsSection() {
-    final enabledCount = _promptTemplates.where((p) => p['enabled'] as bool).length;
+    final enabledCount =
+        _promptTemplates.where((p) => p['enabled'] as bool).length;
     final totalCount = _promptTemplates.length;
-    
+
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -154,9 +154,7 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
               ),
             ],
           ),
-          
           SizedBox(height: 16.h),
-          
           Row(
             children: [
               Expanded(
@@ -167,9 +165,7 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                   color: AppConstants.primaryColor,
                 ),
               ),
-              
               SizedBox(width: 16.w),
-              
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.check_circle_outline,
@@ -178,9 +174,7 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                   color: AppConstants.successColor,
                 ),
               ),
-              
               SizedBox(width: 16.w),
-              
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.pause_circle_outline,
@@ -250,9 +244,7 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
               ),
             ],
           ),
-          
           SizedBox(height: 16.h),
-          
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -271,14 +263,15 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
   /// 构建Prompt卡片
   Widget _buildPromptCard(Map<String, dynamic> prompt, int index) {
     final isEnabled = prompt['enabled'] as bool;
-    
+
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(
-          color: isEnabled ? AppConstants.primaryColor : AppConstants.dividerColor,
+          color:
+              isEnabled ? AppConstants.primaryColor : AppConstants.dividerColor,
           width: 1,
         ),
       ),
@@ -311,7 +304,7 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                   ],
                 ),
               ),
-              
+
               // 状态切换
               Switch(
                 value: isEnabled,
@@ -319,10 +312,10 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                   setState(() {
                     _promptTemplates[index]['enabled'] = value;
                   });
-                  
+
                   // 添加持久化存储逻辑
                   await _savePromptTemplates();
-                  
+
                   // 显示反馈
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
@@ -335,9 +328,9 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
               ),
             ],
           ),
-          
+
           SizedBox(height: 8.h),
-          
+
           Text(
             prompt['description'] as String,
             style: TextStyle(
@@ -345,9 +338,9 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
               color: AppConstants.textSecondaryColor,
             ),
           ),
-          
+
           SizedBox(height: 12.h),
-          
+
           // 操作按钮
           Row(
             children: [
@@ -360,7 +353,7 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                   ),
                 ),
               ),
-              
+
               // 用弹出菜单来节省空间
               PopupMenuButton<String>(
                 icon: Icon(Icons.more_vert, size: 16.sp),
@@ -402,9 +395,13 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                     value: 'delete',
                     child: Row(
                       children: [
-                        Icon(Icons.delete_outline, size: 16.sp, color: AppConstants.errorColor),
+                        Icon(Icons.delete_outline,
+                            size: 16.sp, color: AppConstants.errorColor),
                         SizedBox(width: 8.w),
-                        Text('删除', style: TextStyle(fontSize: 12.sp, color: AppConstants.errorColor)),
+                        Text('删除',
+                            style: TextStyle(
+                                fontSize: 12.sp,
+                                color: AppConstants.errorColor)),
                       ],
                     ),
                   ),
@@ -431,10 +428,13 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
   void _showPromptDialog({Map<String, dynamic>? prompt, int? index}) {
     final isEdit = prompt != null;
     final nameController = TextEditingController(text: prompt?['name'] ?? '');
-    final categoryController = TextEditingController(text: prompt?['category'] ?? '');
-    final descriptionController = TextEditingController(text: prompt?['description'] ?? '');
-    final templateController = TextEditingController(text: prompt?['template'] ?? '');
-    
+    final categoryController =
+        TextEditingController(text: prompt?['category'] ?? '');
+    final descriptionController =
+        TextEditingController(text: prompt?['description'] ?? '');
+    final templateController =
+        TextEditingController(text: prompt?['template'] ?? '');
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -490,7 +490,8 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
           TextButton(
             onPressed: () async {
               final newPrompt = {
-                'id': prompt?['id'] ?? 'prompt_${DateTime.now().millisecondsSinceEpoch}',
+                'id': prompt?['id'] ??
+                    'prompt_${DateTime.now().millisecondsSinceEpoch}',
                 'name': nameController.text,
                 'category': categoryController.text,
                 'description': descriptionController.text,
@@ -498,7 +499,7 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                 'enabled': prompt?['enabled'] ?? true,
                 'createdAt': prompt?['createdAt'] ?? DateTime.now(),
               };
-              
+
               setState(() {
                 if (isEdit && index != null) {
                   _promptTemplates[index] = newPrompt;
@@ -506,12 +507,12 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                   _promptTemplates.add(newPrompt);
                 }
               });
-              
+
               // 保存到本地
               await _savePromptTemplates();
-              
+
               Navigator.pop(context);
-              
+
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(isEdit ? 'Prompt修改成功' : 'Prompt添加成功'),
@@ -543,8 +544,8 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                 SizedBox(height: 8.h),
                 Text('描述：${prompt['description']}'),
                 SizedBox(height: 16.h),
-                const Text('模板内容：', 
-                       style: TextStyle(fontWeight: FontWeight.bold)),
+                const Text('模板内容：',
+                    style: TextStyle(fontWeight: FontWeight.bold)),
                 SizedBox(height: 8.h),
                 Container(
                   width: double.infinity,
@@ -589,10 +590,10 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
               setState(() {
                 _promptTemplates.removeAt(index);
               });
-              
+
               // 保存到本地
               await _savePromptTemplates();
-              
+
               Navigator.pop(context);
               ScaffoldMessenger.of(context).showSnackBar(
                 const SnackBar(
@@ -601,7 +602,8 @@ class _PromptManagementPageState extends State<PromptManagementPage> {
                 ),
               );
             },
-            child: const Text('删除', style: TextStyle(color: AppConstants.errorColor)),
+            child: const Text('删除',
+                style: TextStyle(color: AppConstants.errorColor)),
           ),
         ],
       ),
@@ -686,7 +688,7 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
   @override
   Widget build(BuildContext context) {
     final filteredHistory = _getFilteredHistory();
-    
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('过滤历史'),
@@ -731,9 +733,9 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
           children: [
             // 统计信息
             _buildStatsSection(),
-            
+
             SizedBox(height: 16.h),
-            
+
             // 过滤历史列表
             _buildHistoryList(filteredHistory),
           ],
@@ -753,13 +755,17 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
     filtered.sort((a, b) {
       switch (_selectedSort) {
         case '时间升序':
-          return (a['timestamp'] as DateTime).compareTo(b['timestamp'] as DateTime);
+          return (a['timestamp'] as DateTime)
+              .compareTo(b['timestamp'] as DateTime);
         case '分数降序':
-          return (b['valueScore'] as double).compareTo(a['valueScore'] as double);
+          return (b['valueScore'] as double)
+              .compareTo(a['valueScore'] as double);
         case '分数升序':
-          return (a['valueScore'] as double).compareTo(b['valueScore'] as double);
+          return (a['valueScore'] as double)
+              .compareTo(b['valueScore'] as double);
         default: // 时间降序
-          return (b['timestamp'] as DateTime).compareTo(a['timestamp'] as DateTime);
+          return (b['timestamp'] as DateTime)
+              .compareTo(a['timestamp'] as DateTime);
       }
     });
 
@@ -769,12 +775,17 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
   /// 构建统计信息区域
   Widget _buildStatsSection() {
     final totalCount = _filterHistory.length;
-    final allowedCount = _filterHistory.where((item) => item['action'] == '允许').length;
-    final blockedCount = _filterHistory.where((item) => item['action'] == '拦截').length;
-    final averageScore = _filterHistory.isEmpty 
-        ? 0.0 
-        : _filterHistory.map((item) => item['valueScore'] as double).reduce((a, b) => a + b) / totalCount;
-    
+    final allowedCount =
+        _filterHistory.where((item) => item['action'] == '允许').length;
+    final blockedCount =
+        _filterHistory.where((item) => item['action'] == '拦截').length;
+    final averageScore = _filterHistory.isEmpty
+        ? 0.0
+        : _filterHistory
+                .map((item) => item['valueScore'] as double)
+                .reduce((a, b) => a + b) /
+            totalCount;
+
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -797,9 +808,7 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
               ),
             ],
           ),
-          
           SizedBox(height: 16.h),
-          
           Row(
             children: [
               Expanded(
@@ -810,7 +819,6 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
                   color: AppConstants.primaryColor,
                 ),
               ),
-              
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.check_circle_outline,
@@ -819,7 +827,6 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
                   color: AppConstants.successColor,
                 ),
               ),
-              
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.block_outlined,
@@ -828,7 +835,6 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
                   color: AppConstants.errorColor,
                 ),
               ),
-              
               Expanded(
                 child: _buildStatItem(
                   icon: Icons.trending_up_outlined,
@@ -930,9 +936,7 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
               ),
             ],
           ),
-          
           SizedBox(height: 16.h),
-          
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -953,7 +957,7 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
     final action = item['action'] as String;
     final valueScore = item['valueScore'] as double;
     final actionColor = _getActionColor(action);
-    
+
     return Container(
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
@@ -982,9 +986,7 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
                   ),
                 ),
               ),
-              
               SizedBox(width: 8.w),
-              
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
                 decoration: BoxDecoration(
@@ -1000,9 +1002,7 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
                   ),
                 ),
               ),
-              
               const Spacer(),
-              
               Text(
                 _formatTimeAgo(item['timestamp'] as DateTime),
                 style: TextStyle(
@@ -1012,9 +1012,9 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
               ),
             ],
           ),
-          
+
           SizedBox(height: 8.h),
-          
+
           // 内容
           Text(
             item['content'] as String,
@@ -1025,16 +1025,16 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
           ),
-          
+
           SizedBox(height: 8.h),
-          
+
           // 标签和关键词
           Wrap(
             spacing: 6.w,
             runSpacing: 4.h,
             children: [
-              ...((item['topics'] as List<String>).map((topic) => 
-                Container(
+              ...((item['topics'] as List<String>).map(
+                (topic) => Container(
                   padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
                   decoration: BoxDecoration(
                     color: AppConstants.accentColor.withOpacity(0.1),
@@ -1051,9 +1051,9 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
               )),
             ],
           ),
-          
+
           SizedBox(height: 8.h),
-          
+
           // 底部信息
           Row(
             children: [
@@ -1073,9 +1073,7 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
-              
               SizedBox(width: 16.w),
-              
               Icon(
                 Icons.sentiment_satisfied_outlined,
                 size: 14.sp,
@@ -1089,9 +1087,7 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
                   color: AppConstants.textTertiaryColor,
                 ),
               ),
-              
               const Spacer(),
-              
               TextButton(
                 onPressed: () => _showDetailDialog(item),
                 child: Text('详情', style: TextStyle(fontSize: 11.sp)),
@@ -1136,7 +1132,8 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
                 SizedBox(height: 4.h),
                 Text(item['content'] as String),
                 SizedBox(height: 12.h),
-                Text('价值观分数：${((item['valueScore'] as double) * 100).toInt()}%'),
+                Text(
+                    '价值观分数：${((item['valueScore'] as double) * 100).toInt()}%'),
                 SizedBox(height: 8.h),
                 Text('情感倾向：${item['sentiment']}'),
                 SizedBox(height: 8.h),
@@ -1169,7 +1166,7 @@ class _FilterHistoryPageState extends State<FilterHistoryPage> {
   String _formatTimeAgo(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);
-    
+
     if (difference.inMinutes < 1) {
       return '刚刚';
     } else if (difference.inMinutes < 60) {
@@ -1207,19 +1204,19 @@ class _SettingsPageState extends State<SettingsPage> {
               children: [
                 // 外观设置
                 _buildAppearanceSection(appProvider),
-                
+
                 SizedBox(height: 16.h),
-                
+
                 // 功能设置
                 _buildFunctionalSection(appProvider),
-                
+
                 SizedBox(height: 16.h),
-                
+
                 // 隐私设置
                 _buildPrivacySection(appProvider),
-                
+
                 SizedBox(height: 16.h),
-                
+
                 // 其他设置
                 _buildOtherSection(appProvider),
               ],
@@ -1254,15 +1251,16 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ],
           ),
-          
+
           SizedBox(height: 16.h),
-          
+
           // 主题模式
           ListTile(
             leading: Icon(Icons.dark_mode_outlined, size: 20.sp),
             title: Text('主题模式', style: TextStyle(fontSize: 14.sp)),
-            subtitle: Text(_getThemeModeText(appProvider.themeMode), 
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+            subtitle: Text(_getThemeModeText(appProvider.themeMode),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             trailing: DropdownButton<ThemeMode>(
               value: appProvider.themeMode,
               underline: const SizedBox(),
@@ -1323,15 +1321,16 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ],
           ),
-          
+
           SizedBox(height: 16.h),
-          
+
           // 通知设置
           SwitchListTile(
             secondary: Icon(Icons.notifications_outlined, size: 20.sp),
             title: Text('通知', style: TextStyle(fontSize: 14.sp)),
             subtitle: Text('接收应用通知和提醒',
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.appSettings.enableNotifications,
             onChanged: (value) async {
               await appProvider.toggleNotifications();
@@ -1344,13 +1343,14 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
-          
+
           // 悬浮按钮
           SwitchListTile(
             secondary: Icon(Icons.touch_app_outlined, size: 20.sp),
             title: Text('悬浮按钮', style: TextStyle(fontSize: 14.sp)),
             subtitle: Text('显示应用悬浮操作按钮',
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.appSettings.enableFloatingButton,
             onChanged: (value) async {
               await appProvider.toggleFloatingButton();
@@ -1363,16 +1363,18 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
-          
+
           // 触觉反馈
           SwitchListTile(
             secondary: Icon(Icons.vibration_outlined, size: 20.sp),
             title: Text('触觉反馈', style: TextStyle(fontSize: 14.sp)),
             subtitle: Text('操作时提供触觉反馈',
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.appSettings.enableHapticFeedback,
             onChanged: (value) async {
-              final newSettings = appProvider.appSettings.copyWith(enableHapticFeedback: value);
+              final newSettings =
+                  appProvider.appSettings.copyWith(enableHapticFeedback: value);
               await appProvider.updateAppSettings(newSettings);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -1383,16 +1385,18 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
-          
+
           // 开机自启
           SwitchListTile(
             secondary: Icon(Icons.power_settings_new_outlined, size: 20.sp),
             title: Text('开机自启', style: TextStyle(fontSize: 14.sp)),
             subtitle: Text('系统启动时自动运行应用',
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.appSettings.enableAutoStart,
             onChanged: (value) async {
-              final newSettings = appProvider.appSettings.copyWith(enableAutoStart: value);
+              final newSettings =
+                  appProvider.appSettings.copyWith(enableAutoStart: value);
               await appProvider.updateAppSettings(newSettings);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -1432,18 +1436,20 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ],
           ),
-          
+
           SizedBox(height: 16.h),
-          
+
           // 数据收集
           SwitchListTile(
             secondary: Icon(Icons.analytics_outlined, size: 20.sp),
             title: Text('数据收集', style: TextStyle(fontSize: 14.sp)),
             subtitle: Text('允许收集使用数据用于改进服务',
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.privacySettings.enableDataCollection,
             onChanged: (value) async {
-              final newSettings = appProvider.privacySettings.copyWith(enableDataCollection: value);
+              final newSettings = appProvider.privacySettings
+                  .copyWith(enableDataCollection: value);
               await appProvider.updatePrivacySettings(newSettings);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -1454,16 +1460,18 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
-          
+
           // 统计分析
           SwitchListTile(
             secondary: Icon(Icons.insights_outlined, size: 20.sp),
             title: Text('统计分析', style: TextStyle(fontSize: 14.sp)),
             subtitle: Text('允许发送匿名的使用统计数据',
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.privacySettings.enableAnalytics,
             onChanged: (value) async {
-              final newSettings = appProvider.privacySettings.copyWith(enableAnalytics: value);
+              final newSettings =
+                  appProvider.privacySettings.copyWith(enableAnalytics: value);
               await appProvider.updatePrivacySettings(newSettings);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -1474,16 +1482,18 @@ class _SettingsPageState extends State<SettingsPage> {
               );
             },
           ),
-          
+
           // 崩溃报告
           SwitchListTile(
             secondary: Icon(Icons.bug_report_outlined, size: 20.sp),
             title: Text('崩溃报告', style: TextStyle(fontSize: 14.sp)),
             subtitle: Text('自动发送崩溃报告帮助改进应用',
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             value: appProvider.privacySettings.enableCrashReporting,
             onChanged: (value) async {
-              final newSettings = appProvider.privacySettings.copyWith(enableCrashReporting: value);
+              final newSettings = appProvider.privacySettings
+                  .copyWith(enableCrashReporting: value);
               await appProvider.updatePrivacySettings(newSettings);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -1523,39 +1533,45 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
             ],
           ),
-          
+
           SizedBox(height: 16.h),
-          
+
           // 导出配置
           ListTile(
             leading: Icon(Icons.upload_outlined, size: 20.sp),
             title: Text('导出配置', style: TextStyle(fontSize: 14.sp)),
             subtitle: Text('将应用配置导出为文件',
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             trailing: Icon(Icons.chevron_right, size: 20.sp),
             onTap: () {
               _exportConfig(appProvider);
             },
           ),
-          
+
           // 导入配置
           ListTile(
             leading: Icon(Icons.download_outlined, size: 20.sp),
             title: Text('导入配置', style: TextStyle(fontSize: 14.sp)),
             subtitle: Text('从文件导入应用配置',
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             trailing: Icon(Icons.chevron_right, size: 20.sp),
             onTap: () {
               _importConfig(appProvider);
             },
           ),
-          
+
           // 重置设置
           ListTile(
-            leading: Icon(Icons.restore_outlined, size: 20.sp, color: AppConstants.errorColor),
-            title: Text('重置设置', style: TextStyle(fontSize: 14.sp, color: AppConstants.errorColor)),
+            leading: Icon(Icons.restore_outlined,
+                size: 20.sp, color: AppConstants.errorColor),
+            title: Text('重置设置',
+                style:
+                    TextStyle(fontSize: 14.sp, color: AppConstants.errorColor)),
             subtitle: Text('恢复所有设置为默认值',
-                         style: TextStyle(fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
+                style: TextStyle(
+                    fontSize: 12.sp, color: AppConstants.textSecondaryColor)),
             trailing: Icon(Icons.chevron_right, size: 20.sp),
             onTap: () {
               _showResetDialog(appProvider);
@@ -1582,7 +1598,7 @@ class _SettingsPageState extends State<SettingsPage> {
   void _exportConfig(AppProvider appProvider) async {
     try {
       final config = appProvider.exportConfig();
-      
+
       // 显示导出成功消息
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -1643,7 +1659,8 @@ class _SettingsPageState extends State<SettingsPage> {
                 );
               }
             },
-            child: const Text('确定', style: TextStyle(color: AppConstants.errorColor)),
+            child: const Text('确定',
+                style: TextStyle(color: AppConstants.errorColor)),
           ),
         ],
       ),

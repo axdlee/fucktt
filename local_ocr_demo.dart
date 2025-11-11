@@ -1,44 +1,42 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:math' as math;
 
 /// 🏠 本地OCR服务演示
 /// 展示本地离线OCR的优势和实际应用效果
 class LocalOCRDemo {
-  
   /// 运行完整的本地OCR演示
   static Future<void> runDemo() async {
     print('🏠 === 本地离线OCR服务演示 ===');
     print('📅 演示时间: ${DateTime.now()}');
     print('🎯 目标: 展示本地OCR的强大优势');
     print('');
-    
+
     // 1. 本地OCR优势介绍
     await _showLocalOCRAdvantages();
-    
+
     // 2. 支持的引擎对比
     await _compareEngines();
-    
+
     // 3. 性能测试
     await _performanceTest();
-    
+
     // 4. 隐私保护优势
     await _privacyAdvantages();
-    
+
     // 5. 成本对比
     await _costComparison();
-    
+
     // 6. 实际应用场景
     await _realWorldUseCases();
-    
+
     print('🎉 === 本地OCR演示完成 ===');
   }
-  
+
   /// 展示本地OCR优势
   static Future<void> _showLocalOCRAdvantages() async {
     print('✨ === 第一步：本地OCR核心优势 ===');
     print('');
-    
+
     final advantages = [
       {
         'title': '🌐 无网络依赖',
@@ -71,7 +69,7 @@ class LocalOCRDemo {
         'impact': '中文识别准确率95%+',
       },
     ];
-    
+
     for (final advantage in advantages) {
       print('${advantage['title']}');
       print('   📝 说明: ${advantage['description']}');
@@ -80,12 +78,12 @@ class LocalOCRDemo {
       print('');
     }
   }
-  
+
   /// 引擎对比
   static Future<void> _compareEngines() async {
     print('🔧 === 第二步：本地OCR引擎对比 ===');
     print('');
-    
+
     final engines = [
       {
         'name': 'TensorFlow Lite',
@@ -124,7 +122,7 @@ class LocalOCRDemo {
         'advantage': '谷歌官方，集成简单',
       },
     ];
-    
+
     for (final engine in engines) {
       print('🏆 ${engine['name']}');
       print('   📦 模型大小: ${engine['size']}');
@@ -136,12 +134,12 @@ class LocalOCRDemo {
       print('');
     }
   }
-  
+
   /// 性能测试
   static Future<void> _performanceTest() async {
     print('⚡ === 第三步：性能基准测试 ===');
     print('');
-    
+
     final testCases = [
       {
         'scenario': '今日头条新闻标题',
@@ -159,52 +157,57 @@ class LocalOCRDemo {
         'complexity': '复杂',
       },
     ];
-    
+
     print('📊 本地OCR vs 云端OCR 性能对比:');
     print('');
-    
+
     for (final testCase in testCases) {
       print('🧪 测试场景: ${testCase['scenario']} (${testCase['complexity']})');
-      
+
       // 模拟本地OCR测试
       print('   🏠 本地OCR测试:');
       final localStopwatch = Stopwatch()..start();
-      await Future.delayed(Duration(milliseconds: 200 + math.Random().nextInt(400)));
+      await Future.delayed(
+          Duration(milliseconds: 200 + math.Random().nextInt(400)));
       localStopwatch.stop();
-      
+
       final localAccuracy = 0.92 + math.Random().nextDouble() * 0.06;
       print('     ⏱️ 识别时间: ${localStopwatch.elapsedMilliseconds}ms');
       print('     🎯 准确率: ${(localAccuracy * 100).toStringAsFixed(1)}%');
       print('     💰 成本: ¥0 (本地运行)');
       print('     🌐 网络: 无需网络');
-      
+
       // 模拟云端OCR测试
       print('   ☁️ 云端OCR测试:');
       final cloudStopwatch = Stopwatch()..start();
-      await Future.delayed(Duration(milliseconds: 800 + math.Random().nextInt(1200)));
+      await Future.delayed(
+          Duration(milliseconds: 800 + math.Random().nextInt(1200)));
       cloudStopwatch.stop();
-      
+
       final cloudAccuracy = 0.90 + math.Random().nextDouble() * 0.08;
       print('     ⏱️ 识别时间: ${cloudStopwatch.elapsedMilliseconds}ms');
       print('     🎯 准确率: ${(cloudAccuracy * 100).toStringAsFixed(1)}%');
       print('     💰 成本: ¥0.0015/次');
       print('     🌐 网络: 需要稳定网络');
-      
+
       // 性能对比
-      final speedImprovement = ((cloudStopwatch.elapsedMilliseconds - localStopwatch.elapsedMilliseconds) / cloudStopwatch.elapsedMilliseconds * 100);
+      final speedImprovement = ((cloudStopwatch.elapsedMilliseconds -
+              localStopwatch.elapsedMilliseconds) /
+          cloudStopwatch.elapsedMilliseconds *
+          100);
       print('   📈 本地OCR优势: 速度提升${speedImprovement.toStringAsFixed(1)}%');
       print('');
     }
   }
-  
+
   /// 隐私保护优势
   static Future<void> _privacyAdvantages() async {
     print('🔒 === 第四步：隐私保护优势 ===');
     print('');
-    
+
     print('📋 隐私保护对比分析:');
     print('');
-    
+
     print('☁️ **云端OCR的隐私风险:**');
     print('   ❌ 图像数据上传到第三方服务器');
     print('   ❌ 识别文本可能被服务商记录');
@@ -212,7 +215,7 @@ class LocalOCRDemo {
     print('   ❌ 受政策法规和服务商政策影响');
     print('   ❌ 无法确保数据完全删除');
     print('');
-    
+
     print('🏠 **本地OCR的隐私优势:**');
     print('   ✅ 数据从不离开用户设备');
     print('   ✅ 完全离线处理，无网络传输');
@@ -220,7 +223,7 @@ class LocalOCRDemo {
     print('   ✅ 符合最严格的隐私保护标准');
     print('   ✅ 适用于处理敏感信息场景');
     print('');
-    
+
     print('🎯 **适用的敏感场景:**');
     print('   • 身份证、护照等证件识别');
     print('   • 银行卡、账单等金融信息');
@@ -229,15 +232,15 @@ class LocalOCRDemo {
     print('   • 个人聊天记录、笔记等私人内容');
     print('');
   }
-  
+
   /// 成本对比
   static Future<void> _costComparison() async {
     print('💰 === 第五步：成本效益分析 ===');
     print('');
-    
+
     print('📊 运营成本对比 (月识别10000次):');
     print('');
-    
+
     // 云端OCR成本
     print('☁️ **云端OCR成本:**');
     print('   💳 百度OCR: ¥13.5 (1000免费 + 9000×¥1.5/千次)');
@@ -245,7 +248,7 @@ class LocalOCRDemo {
     print('   💳 阿里云OCR: ¥11.4 (500免费 + 9500×¥1.2/千次)');
     print('   📈 年度成本: ¥136-162');
     print('');
-    
+
     // 本地OCR成本
     print('🏠 **本地OCR成本:**');
     print('   💳 识别费用: ¥0 (完全免费)');
@@ -254,7 +257,7 @@ class LocalOCRDemo {
     print('   🔧 开发集成: 一次性成本');
     print('   📈 年度成本: ¥0');
     print('');
-    
+
     print('💡 **成本节省分析:**');
     print('   🎯 每年节省: ¥136-162');
     print('   📈 3年节省: ¥408-486');
@@ -262,12 +265,12 @@ class LocalOCRDemo {
     print('   💰 ROI: 无限大 (零运营成本)');
     print('');
   }
-  
+
   /// 实际应用场景
   static Future<void> _realWorldUseCases() async {
     print('🎯 === 第六步：实际应用场景 ===');
     print('');
-    
+
     final useCases = [
       {
         'scenario': '价值观内容过滤器',
@@ -300,7 +303,7 @@ class LocalOCRDemo {
         'benefits': ['信息安全', '合规要求', '成本控制'],
       },
     ];
-    
+
     for (final useCase in useCases) {
       print('📱 ${useCase['scenario']}');
       print('   📝 应用描述: ${useCase['description']}');
@@ -308,7 +311,7 @@ class LocalOCRDemo {
       print('   ✨ 主要优势: ${(useCase['benefits'] as List).join('、')}');
       print('');
     }
-    
+
     print('🏆 **总结：本地OCR最适合的场景**');
     print('   1️⃣ 对隐私要求极高的应用');
     print('   2️⃣ 需要实时响应的场景');
@@ -322,7 +325,7 @@ class LocalOCRDemo {
 /// 主函数
 void main() async {
   await LocalOCRDemo.runDemo();
-  
+
   print('');
   print('🎉 **结论：强烈推荐使用本地OCR！**');
   print('');

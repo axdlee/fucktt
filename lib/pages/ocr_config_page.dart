@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
 import '../services/ocr_service_manager.dart';
-import '../services/chinese_ocr_service.dart';
 import '../widgets/app_card.dart';
 import '../constants/app_constants.dart';
 
@@ -31,15 +30,15 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
 
   Future<void> _initializeAndCheckServices() async {
     setState(() => _isLoading = true);
-    
+
     try {
       // 初始化OCR服务管理器
       await _ocrManager.initialize();
-      
+
       // 获取状态和推荐
       _status = _ocrManager.getStatus();
       _recommendation = _ocrManager.getRecommendation();
-      
+
       setState(() => _isLoading = false);
     } catch (e) {
       setState(() => _isLoading = false);
@@ -49,11 +48,11 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
 
   Future<void> _testAllServices() async {
     setState(() => _isTesting = true);
-    
+
     try {
       _serviceTests = await _ocrManager.testAllServices();
       setState(() {});
-      
+
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('✅ 所有OCR服务测试完成'),
@@ -85,52 +84,52 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
         actions: [
           IconButton(
             onPressed: _isTesting ? null : _testAllServices,
-            icon: _isTesting 
-              ? SizedBox(
-                  width: 20.w,
-                  height: 20.w,
-                  child: const CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Icon(Icons.speed),
+            icon: _isTesting
+                ? SizedBox(
+                    width: 20.w,
+                    height: 20.w,
+                    child: const CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.speed),
             tooltip: '测试所有服务',
           ),
         ],
       ),
-      body: _isLoading 
-        ? const Center(child: CircularProgressIndicator())
-        : SingleChildScrollView(
-            padding: EdgeInsets.all(16.w),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // 当前状态概览
-                _buildStatusOverview(),
-                SizedBox(height: 24.h),
-                
-                // 国内使用建议
-                _buildChinaRecommendation(),
-                SizedBox(height: 24.h),
-                
-                // OCR策略选择
-                _buildStrategySelection(),
-                SizedBox(height: 24.h),
-                
-                // 服务商状态
-                _buildServiceProviders(),
-                SizedBox(height: 24.h),
-                
-                // 服务测试结果
-                if (_serviceTests != null) _buildTestResults(),
-              ],
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : SingleChildScrollView(
+              padding: EdgeInsets.all(16.w),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // 当前状态概览
+                  _buildStatusOverview(),
+                  SizedBox(height: 24.h),
+
+                  // 国内使用建议
+                  _buildChinaRecommendation(),
+                  SizedBox(height: 24.h),
+
+                  // OCR策略选择
+                  _buildStrategySelection(),
+                  SizedBox(height: 24.h),
+
+                  // 服务商状态
+                  _buildServiceProviders(),
+                  SizedBox(height: 24.h),
+
+                  // 服务测试结果
+                  if (_serviceTests != null) _buildTestResults(),
+                ],
+              ),
             ),
-          ),
     );
   }
 
   /// 构建状态概览
   Widget _buildStatusOverview() {
     if (_status == null) return const SizedBox.shrink();
-    
+
     return AppCard(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -153,35 +152,38 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
             ],
           ),
           SizedBox(height: 16.h),
-          
           _buildStatusItem(
             '📊 整体状态',
             _status!.statusSummary,
-            _status!.hasAnyService ? AppConstants.successColor : AppConstants.errorColor,
+            _status!.hasAnyService
+                ? AppConstants.successColor
+                : AppConstants.errorColor,
           ),
-          
           _buildStatusItem(
             '🌍 环境检测',
             _status!.isInChina ? '中国大陆' : '海外',
-            _status!.isInChina ? AppConstants.warningColor : AppConstants.primaryColor,
+            _status!.isInChina
+                ? AppConstants.warningColor
+                : AppConstants.primaryColor,
           ),
-          
           _buildStatusItem(
             '🎯 当前策略',
             _status!.currentStrategy.displayName,
             AppConstants.primaryColor,
           ),
-          
           _buildStatusItem(
             '🤖 Google ML Kit',
             _status!.googleMLKitAvailable ? '可用' : '不可用',
-            _status!.googleMLKitAvailable ? AppConstants.successColor : AppConstants.errorColor,
+            _status!.googleMLKitAvailable
+                ? AppConstants.successColor
+                : AppConstants.errorColor,
           ),
-          
           _buildStatusItem(
             '🇨🇳 国产OCR',
             _status!.chineseOCRAvailable ? '可用' : '不可用',
-            _status!.chineseOCRAvailable ? AppConstants.successColor : AppConstants.errorColor,
+            _status!.chineseOCRAvailable
+                ? AppConstants.successColor
+                : AppConstants.errorColor,
           ),
         ],
       ),
@@ -243,7 +245,6 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
             ],
           ),
           SizedBox(height: 16.h),
-          
           Container(
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
@@ -279,9 +280,7 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
               ],
             ),
           ),
-          
           SizedBox(height: 12.h),
-          
           Container(
             padding: EdgeInsets.all(12.w),
             decoration: BoxDecoration(
@@ -346,12 +345,13 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
             ],
           ),
           SizedBox(height: 16.h),
-          
           ...OCRStrategy.values.map((strategy) {
             final isSelected = _status?.currentStrategy == strategy;
             return Card(
               margin: EdgeInsets.only(bottom: 8.h),
-              color: isSelected ? AppConstants.primaryColor.withOpacity(0.1) : null,
+              color: isSelected
+                  ? AppConstants.primaryColor.withOpacity(0.1)
+                  : null,
               child: ListTile(
                 leading: Radio<OCRStrategy>(
                   value: strategy,
@@ -362,7 +362,7 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
                       setState(() {
                         _status = _ocrManager.getStatus();
                       });
-                      
+
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
                           content: Text('✅ 已切换到: ${strategy.displayName}'),
@@ -376,7 +376,8 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
                   strategy.displayName,
                   style: TextStyle(
                     fontSize: 14.sp,
-                    fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+                    fontWeight:
+                        isSelected ? FontWeight.bold : FontWeight.normal,
                   ),
                 ),
                 subtitle: Text(
@@ -388,7 +389,7 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
                 ),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );
@@ -433,28 +434,24 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
             ],
           ),
           SizedBox(height: 16.h),
-          
           _buildProviderItem(
             'Google ML Kit',
             '🤖 免费离线识别',
             _status?.googleMLKitAvailable ?? false,
             '需要Google Play服务支持',
           ),
-          
           _buildProviderItem(
             '百度OCR',
             '🇨🇳 每月免费1000次',
             true, // 假设已配置
             '中文识别效果好，免费额度充足',
           ),
-          
           _buildProviderItem(
             '腾讯OCR',
             '🏢 企业级服务',
             true, // 假设已配置
             '稳定性好，适合大规模使用',
           ),
-          
           _buildProviderItem(
             '阿里云OCR',
             '⚡ 识别速度快',
@@ -466,15 +463,20 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
     );
   }
 
-  Widget _buildProviderItem(String name, String description, bool available, String note) {
+  Widget _buildProviderItem(
+      String name, String description, bool available, String note) {
     return Container(
       margin: EdgeInsets.only(bottom: 12.h),
       padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
-        color: available ? AppConstants.successColor.withOpacity(0.05) : AppConstants.errorColor.withOpacity(0.05),
+        color: available
+            ? AppConstants.successColor.withOpacity(0.05)
+            : AppConstants.errorColor.withOpacity(0.05),
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(
-          color: available ? AppConstants.successColor.withOpacity(0.2) : AppConstants.errorColor.withOpacity(0.2),
+          color: available
+              ? AppConstants.successColor.withOpacity(0.2)
+              : AppConstants.errorColor.withOpacity(0.2),
         ),
       ),
       child: Column(
@@ -484,7 +486,9 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
             children: [
               Icon(
                 available ? Icons.check_circle : Icons.error,
-                color: available ? AppConstants.successColor : AppConstants.errorColor,
+                color: available
+                    ? AppConstants.successColor
+                    : AppConstants.errorColor,
                 size: 16.sp,
               ),
               SizedBox(width: 8.w),
@@ -500,7 +504,9 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
                 available ? '可用' : '不可用',
                 style: TextStyle(
                   fontSize: 12.sp,
-                  color: available ? AppConstants.successColor : AppConstants.errorColor,
+                  color: available
+                      ? AppConstants.successColor
+                      : AppConstants.errorColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -551,24 +557,27 @@ class _OCRConfigPageState extends State<OCRConfigPage> {
             ],
           ),
           SizedBox(height: 16.h),
-          
           ..._serviceTests!.entries.map((entry) {
             final isAvailable = entry.value;
             return ListTile(
               leading: Icon(
                 isAvailable ? Icons.check_circle : Icons.error,
-                color: isAvailable ? AppConstants.successColor : AppConstants.errorColor,
+                color: isAvailable
+                    ? AppConstants.successColor
+                    : AppConstants.errorColor,
               ),
               title: Text(entry.key),
               trailing: Text(
                 isAvailable ? '✅ 通过' : '❌ 失败',
                 style: TextStyle(
-                  color: isAvailable ? AppConstants.successColor : AppConstants.errorColor,
+                  color: isAvailable
+                      ? AppConstants.successColor
+                      : AppConstants.errorColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

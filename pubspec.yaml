@@ -69,6 +69,9 @@ dev_dependencies:
   # 代码分析
   flutter_lints: ^6.0.0
 
+  # 测试依赖
+  mockito: ^5.4.3
+
 flutter:
   uses-material-design: true
   

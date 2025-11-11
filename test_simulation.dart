@@ -6,22 +6,23 @@ import 'package:dio/dio.dart';
 /// 这个脚本将触发真实的OCR和AI分析功能
 class RealSimulationTest {
   final Dio _dio = Dio();
-  
+
   // SiliconFlow API配置
   static const String apiKey = 'sk-xxx';
   static const String baseUrl = 'https://api.siliconflow.cn/v1';
-  
+
   /// 测试内容样本
   final List<Map<String, dynamic>> testSamples = [
     {
       'id': 'positive_sample',
       'title': '正能量内容测试',
-      'content': '某地志愿者团队连续三年为贫困山区儿童送书籍，累计帮助2000多名孩子接受教育。这个由年轻人组成的团队，用实际行动诠释了什么是奉献精神。',
+      'content':
+          '某地志愿者团队连续三年为贫困山区儿童送书籍，累计帮助2000多名孩子接受教育。这个由年轻人组成的团队，用实际行动诠释了什么是奉献精神。',
       'expectedScore': 0.85,
       'expectedAction': 'allow',
     },
     {
-      'id': 'controversial_sample', 
+      'id': 'controversial_sample',
       'title': '争议内容测试',
       'content': '网络上某明星又爆出丑闻，各种小道消息满天飞。粉丝和黑粉在评论区激烈对骂，场面一度失控。这种低俗八卦严重污染网络环境。',
       'expectedScore': 0.3,
@@ -29,7 +30,7 @@ class RealSimulationTest {
     },
     {
       'id': 'educational_sample',
-      'title': '教育价值内容测试', 
+      'title': '教育价值内容测试',
       'content': '清华大学教授分享学习方法：阅读是提升思维能力的最佳途径。他建议学生每天至少阅读一小时，培养独立思考和批判性思维能力。',
       'expectedScore': 0.9,
       'expectedAction': 'allow',
@@ -42,7 +43,7 @@ class RealSimulationTest {
     print('📅 测试时间: ${DateTime.now().toString()}');
     print('🎯 测试目标: 验证OCR和AI分析功能的真实可用性');
     print('');
-    
+
     // 设置Dio配置
     _dio.options.baseUrl = baseUrl;
     _dio.options.headers = {
@@ -51,7 +52,7 @@ class RealSimulationTest {
     };
     _dio.options.connectTimeout = Duration(seconds: 30);
     _dio.options.receiveTimeout = Duration(seconds: 120);
-    
+
     // 添加请求/响应拦截器
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) {
@@ -82,7 +83,7 @@ class RealSimulationTest {
       final response = await _dio.get('/models');
       final models = response.data['data'] as List;
       final modelNames = models.map((m) => m['id'] as String).toList();
-      
+
       print('✅ 成功获取到 ${modelNames.length} 个模型:');
       for (final name in modelNames.take(5)) {
         print('  - $name');
@@ -100,11 +101,13 @@ class RealSimulationTest {
   }
 
   /// 真实AI分析测试
-  Future<void> testRealAIAnalysis(String content, {String model = 'Qwen/Qwen2-7B-Instruct'}) async {
+  Future<void> testRealAIAnalysis(String content,
+      {String model = 'Qwen/Qwen2-7B-Instruct'}) async {
     print('🤖 测试2: 真实AI内容分析');
-    print('📝 分析内容: ${content.length > 50 ? content.substring(0, 50) + '...' : content}');
+    print(
+        '📝 分析内容: ${content.length > 50 ? '${content.substring(0, 50)}...' : content}');
     print('🧠 使用模型: $model');
-    
+
     try {
       final prompt = '''
 请分析以下文本内容的价值观匹配度，返回JSON格式结果：
@@ -148,7 +151,7 @@ $content
       final aiResponse = response.data['choices'][0]['message']['content'];
       print('🎯 AI分析结果:');
       print(aiResponse);
-      
+
       // 尝试解析JSON结果
       try {
         final jsonStart = aiResponse.indexOf('{');
@@ -167,7 +170,6 @@ $content
       } catch (e) {
         print('⚠️ JSON解析失败，但获得了AI响应');
       }
-      
     } catch (e) {
       print('❌ AI分析失败: $e');
     }
@@ -178,7 +180,7 @@ $content
   Future<void> testOCRSimulation() async {
     print('📱 测试3: 模拟OCR文本识别');
     print('这里模拟从今日头条界面识别到的文本内容：');
-    
+
     final ocrResults = [
       {
         'source': '今日头条标题栏',
@@ -191,7 +193,7 @@ $content
         'confidence': 0.92,
       },
       {
-        'source': '今日头条评论区', 
+        'source': '今日头条评论区',
         'text': '这种技术真的很棒！希望能在我们这里也推广。',
         'confidence': 0.88,
       },
@@ -203,7 +205,7 @@ $content
       print('  内容: ${result['text']}');
       print('  置信度: ${result['confidence']}');
       print('');
-      
+
       // 对每个OCR结果进行AI分析
       await testRealAIAnalysis(result['text'] as String);
     }
@@ -212,7 +214,7 @@ $content
   /// 综合测试流程
   Future<void> runComprehensiveTest() async {
     await initializeTest();
-    
+
     // 测试1: 获取AI模型
     final models = await testGetModels();
     if (models.isEmpty) {
@@ -233,7 +235,7 @@ $content
 
     // 测试4: 性能测试
     await testPerformance();
-    
+
     print('🎉 === 真实模拟测试完成 ===');
     print('✅ 所有核心功能均通过真实API验证');
     print('📊 OCR识别、AI分析、价值观过滤流程工作正常');
@@ -242,17 +244,17 @@ $content
   /// 性能测试
   Future<void> testPerformance() async {
     print('⚡ 测试4: 性能基准测试');
-    
+
     final testContent = '人工智能正在改变我们的生活方式，从智能手机到自动驾驶，AI技术无处不在。';
     final stopwatch = Stopwatch()..start();
-    
+
     try {
       await testRealAIAnalysis(testContent);
       stopwatch.stop();
-      
+
       final duration = stopwatch.elapsedMilliseconds;
       print('⏱️ AI分析耗时: ${duration}ms');
-      
+
       if (duration < 5000) {
         print('✅ 性能良好 (< 5秒)');
       } else if (duration < 10000) {
@@ -260,7 +262,6 @@ $content
       } else {
         print('❌ 性能较差 (> 10秒)');
       }
-      
     } catch (e) {
       print('❌ 性能测试失败: $e');
     }
