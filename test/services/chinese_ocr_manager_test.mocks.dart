@@ -7,8 +7,8 @@ import 'dart:async' as _i3;
 import 'dart:typed_data' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:value_filter/services/chinese_ocr/chinese_ocr_providers.dart'
-    as _i2;
+import 'package:value_filter/services/chinese_ocr/chinese_ocr_providers.dart' as _i2;
+import 'package:value_filter/abstract/ocr_service.dart' as _i5;
 
 // ignore_for_file: type=lint
 // ignore_for_file: avoid_redundant_argument_values
@@ -32,14 +32,19 @@ class MockBaiduOcrService extends _i1.Mock implements _i2.BaiduOcrService {
   }
 
   @override
-  _i3.Future<dynamic> recognize(_i4.Uint8List? imageData) =>
+  _i3.Future<_i5.OcrResult> recognize(_i4.Uint8List imageData) =>
       (super.noSuchMethod(
         Invocation.method(
           #recognize,
           [imageData],
         ),
-        returnValue: _i3.Future<dynamic>.value(),
-      ) as _i3.Future<dynamic>);
+        returnValue: _i3.Future<_i5.OcrResult>.value(_i5.OcrResult(
+          fullText: '',
+          blocks: [],
+          confidence: 0.0,
+          language: '',
+        )),
+      ) as _i3.Future<_i5.OcrResult>);
 }
 
 /// A class which mocks [TencentOcrService].
@@ -51,12 +56,17 @@ class MockTencentOcrService extends _i1.Mock implements _i2.TencentOcrService {
   }
 
   @override
-  _i3.Future<dynamic> recognize(_i4.Uint8List? imageData) =>
+  _i3.Future<_i5.OcrResult> recognize(_i4.Uint8List imageData) =>
       (super.noSuchMethod(
         Invocation.method(
           #recognize,
           [imageData],
         ),
-        returnValue: _i3.Future<dynamic>.value(),
-      ) as _i3.Future<dynamic>);
+        returnValue: _i3.Future<_i5.OcrResult>.value(_i5.OcrResult(
+          fullText: '',
+          blocks: [],
+          confidence: 0.0,
+          language: '',
+        )),
+      ) as _i3.Future<_i5.OcrResult>);
 }
