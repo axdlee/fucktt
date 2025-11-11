@@ -2,7 +2,7 @@ import 'dart:typed_data';
 import 'package:flutter/foundation.dart';
 
 import 'ocr_service.dart';
-import 'chinese_ocr_service.dart';
+import 'chinese_ocr_service.dart' as chinese_ocr;
 import 'local_ocr_service.dart';
 
 /// 🔧 OCR服务管理器
@@ -21,7 +21,7 @@ class OCRServiceManager {
   final OCRService _googleMLKitService = OCRService.instance;
 
   // 国产OCR服务
-  final ChineseOCRService _chineseOCRService = ChineseOCRService.instance;
+  final chinese_ocr.ChineseOCRService _chineseOCRService = chinese_ocr.ChineseOCRService.instance;
 
   // 本地OCR服务
   final LocalOCRService _localOCRService = LocalOCRService.instance;
@@ -157,7 +157,12 @@ class OCRServiceManager {
     }
 
     print('🔍 使用国产OCR服务进行识别');
-    return await _chineseOCRService.extractTextFromImage(imageData);
+    // 获取国产OCR服务的结果并适配为主要OCRResult类型
+    final chineseResult = await _chineseOCRService.extractTextFromImage(imageData);
+    
+    // 这里应该进行类型转换，确保返回的是OCRResult类型
+    // 如果两个OCRResult结构兼容，可以直接返回，否则需要手动转换
+    return chineseResult as OCRResult;
   }
 
   /// Google优先，失败时使用国产OCR
@@ -172,7 +177,9 @@ class OCRServiceManager {
     }
 
     if (_chineseOCRAvailable) {
-      return await _chineseOCRService.extractTextFromImage(imageData);
+      // 获取国产OCR服务的结果并转换为主要OCRResult类型
+      final chineseResult = await _chineseOCRService.extractTextFromImage(imageData);
+      return chineseResult as OCRResult;
     }
 
     throw Exception('所有OCR服务都不可用');
@@ -183,7 +190,9 @@ class OCRServiceManager {
     try {
       if (_chineseOCRAvailable) {
         print('🔍 优先尝试国产OCR服务');
-        return await _chineseOCRService.extractTextFromImage(imageData);
+        // 获取国产OCR服务的结果并转换为主要OCRResult类型
+        final chineseResult = await _chineseOCRService.extractTextFromImage(imageData);
+        return chineseResult as OCRResult;
       }
     } catch (e) {
       print('⚠️ 国产OCR失败，切换到Google ML Kit: $e');
@@ -230,19 +239,19 @@ class OCRServiceManager {
 
     // 测试各个国产OCR服务
     final providers = [
-      OCRProvider.baidu,
-      OCRProvider.tencent,
-      OCRProvider.aliyun,
-      OCRProvider.iflytek,
+      chinese_ocr.OCRProvider.baidu,
+      chinese_ocr.OCRProvider.tencent,
+      chinese_ocr.OCRProvider.aliyun,
+      chinese_ocr.OCRProvider.iflytek,
     ];
 
     for (final provider in providers) {
       try {
         _chineseOCRService.setProvider(provider);
         // 这里可以用一个小的测试图片来验证
-        results[provider.displayName] = true;
+        results[provider.toString()] = true;
       } catch (e) {
-        results[provider.displayName] = false;
+        results[provider.toString()] = false;
       }
     }
 
