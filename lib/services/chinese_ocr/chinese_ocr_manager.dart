@@ -38,8 +38,9 @@ class ChineseOcrManager extends OcrService {
           if (_baiduOcr != null) return await _baiduOcr!.recognize(imageData);
           break;
         case OcrProvider.tencent:
-          if (_tencentOcr != null)
+          if (_tencentOcr != null) {
             return await _tencentOcr!.recognize(imageData);
+          }
           break;
         default:
           break;
@@ -85,8 +86,9 @@ class ChineseOcrManager extends OcrService {
             if (_baiduOcr != null) return await _baiduOcr!.recognize(imageData);
             break;
           case OcrProvider.tencent:
-            if (_tencentOcr != null)
+            if (_tencentOcr != null) {
               return await _tencentOcr!.recognize(imageData);
+            }
             break;
           default:
             break;
