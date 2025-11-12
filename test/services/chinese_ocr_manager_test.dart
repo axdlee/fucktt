@@ -26,17 +26,18 @@ void main() {
 
     test('初始化服务', () async {
       // 模拟百度OCR服务初始化成功
-      when(mockBaiduOcr.recognize(Uint8List(0)))
+      when(mockBaiduOcr.recognize(argThat(isNotNull)))
           .thenAnswer((_) async => _createMockOcrResult());
 
       await ocrManager.initialize();
 
-      verify(mockBaiduOcr.recognize(Uint8List(0))).called(1);
+      verify(mockBaiduOcr.recognize(argThat(isNotNull))).called(1);
     });
 
     test('识别文本 - 百度OCR', () async {
       final mockResult = _createMockOcrResult();
-      when(mockBaiduOcr.recognize(any)).thenAnswer((_) async => mockResult);
+      when(mockBaiduOcr.recognize(argThat(isNotNull)))
+          .thenAnswer((_) async => mockResult);
 
       final result = await ocrManager.extractText(Uint8List(0));
 
@@ -46,21 +47,25 @@ void main() {
     });
 
     test('故障转移 - 百度失败时使用腾讯', () async {
-      when(mockBaiduOcr.recognize(any)).thenThrow(Exception('百度OCR失败'));
+      when(mockBaiduOcr.recognize(argThat(isNotNull)))
+          .thenThrow(Exception('百度OCR失败'));
 
       final mockResult = _createMockOcrResult();
-      when(mockTencentOcr.recognize(any)).thenAnswer((_) async => mockResult);
+      when(mockTencentOcr.recognize(argThat(isNotNull)))
+          .thenAnswer((_) async => mockResult);
 
       final result = await ocrManager.extractText(Uint8List(0));
 
-      verify(mockBaiduOcr.recognize(any)).called(1);
-      verify(mockTencentOcr.recognize(any)).called(1);
+      verify(mockBaiduOcr.recognize(argThat(isNotNull))).called(1);
+      verify(mockTencentOcr.recognize(argThat(isNotNull))).called(1);
       expect(result.fullText, equals('测试文本'));
     });
 
     test('所有OCR服务都失败时抛出异常', () async {
-      when(mockBaiduOcr.recognize(any)).thenThrow(Exception('百度OCR失败'));
-      when(mockTencentOcr.recognize(any)).thenThrow(Exception('腾讯OCR失败'));
+      when(mockBaiduOcr.recognize(argThat(isNotNull)))
+          .thenThrow(Exception('百度OCR失败'));
+      when(mockTencentOcr.recognize(argThat(isNotNull)))
+          .thenThrow(Exception('腾讯OCR失败'));
 
       expect(
         () => ocrManager.extractText(Uint8List(0)),
@@ -70,7 +75,8 @@ void main() {
 
     test('批量识别文本', () async {
       final mockResult = _createMockOcrResult();
-      when(mockBaiduOcr.recognize(any)).thenAnswer((_) async => mockResult);
+      when(mockBaiduOcr.recognize(argThat(isNotNull)))
+          .thenAnswer((_) async => mockResult);
 
       final images = [Uint8List(0), Uint8List(1), Uint8List(2)];
       final results = await ocrManager.extractTexts(images);

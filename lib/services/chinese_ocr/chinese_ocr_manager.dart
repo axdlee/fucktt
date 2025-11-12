@@ -60,12 +60,8 @@ class ChineseOcrManager extends OcrService {
 
   @override
   String cleanText(String text) {
-    // 清理多余空白字符和特殊符号
-    return text
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .replaceAll(
-            RegExp(r'[^\\u4e00-\\u9fff\\w\\s,.!?;:\"' '""()\\[\\]{}]'), '')
-        .trim();
+    // 清理所有空白字符
+    return text.replaceAll(RegExp(r'\s+'), '');
   }
 
   @override

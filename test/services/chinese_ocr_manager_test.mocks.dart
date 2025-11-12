@@ -32,7 +32,7 @@ class MockBaiduOcrService extends _i1.Mock implements _i2.BaiduOcrService {
   }
 
   @override
-  _i3.Future<_i5.OcrResult> recognize(_i4.Uint8List imageData) =>
+  _i3.Future<_i5.OcrResult> recognize(_i4.Uint8List? imageData) =>
       (super.noSuchMethod(
         Invocation.method(
           #recognize,
@@ -56,7 +56,7 @@ class MockTencentOcrService extends _i1.Mock implements _i2.TencentOcrService {
   }
 
   @override
-  _i3.Future<_i5.OcrResult> recognize(_i4.Uint8List imageData) =>
+  _i3.Future<_i5.OcrResult> recognize(_i4.Uint8List? imageData) =>
       (super.noSuchMethod(
         Invocation.method(
           #recognize,
