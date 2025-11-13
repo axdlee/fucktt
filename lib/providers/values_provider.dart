@@ -244,11 +244,16 @@ class ValuesProvider extends ChangeNotifier {
     try {
       final box = _currentBox;
       await box.delete(templateId);
-      await _loadTemplates();
+      
+      // 优化：直接从内存中删除模板，避免重新加载所有数据
+      _templates.removeWhere((template) => template.id == templateId);
+      
       _clearError();
       notifyListeners();
     } catch (e) {
       _setError('删除价值观模板失败: $e');
+      // 出错时重新加载以确保数据一致性
+      await _loadTemplates();
     } finally {
       _setLoading(false);
     }
@@ -511,15 +516,22 @@ class ValuesProvider extends ChangeNotifier {
     try {
       final box = _currentBox;
       
+      // 优化：批量导入，然后直接更新内存中的数据
       for (final template in templates) {
         await box.put(template.id, template);
       }
       
-      await _loadTemplates();
+      // 直接更新内存中的模板列表，避免重新加载所有数据
+      _templates.clear();
+      _templates.addAll(templates);
+      _sortTemplates();
+      
       _clearError();
       notifyListeners();
     } catch (e) {
       _setError('导入价值观模板失败: $e');
+      // 出错时重新加载以确保数据一致性
+      await _loadTemplates();
     } finally {
       _setLoading(false);
     }
@@ -555,11 +567,14 @@ class ValuesProvider extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
       
-      await _loadTemplates();
+      // 优化：从内存中过滤掉已删除的自定义模板
+      _templates.removeWhere((template) => template.isCustom);
       _clearError();
       notifyListeners();
     } catch (e) {
       _setError('重置设置失败: $e');
+      // 出错时重新加载以确保数据一致性
+      await _loadTemplates();
     } finally {
       _setLoading(false);
     }
@@ -581,14 +596,25 @@ class ValuesProvider extends ChangeNotifier {
         for (final template in templates) {
           await box.put(template.id, template);
         }
+        
+        // 优化：直接更新内存数据，避免重新加载所有数据
+        _templates.clear();
+        _templates.addAll(templates);
+        _sortTemplates();
       }
       
-      await _loadTemplates();
+      // 处理用户档案
+      if (data.containsKey('userProfile')) {
+        _userProfile = UserValuesProfile.fromJson(data['userProfile']);
+      }
+      
       _clearError();
       notifyListeners();
       return true;
     } catch (e) {
       _setError('导入价值观配置失败: $e');
+      // 出错时重新加载以确保数据一致性
+      await _loadTemplates();
       return false;
     } finally {
       _setLoading(false);

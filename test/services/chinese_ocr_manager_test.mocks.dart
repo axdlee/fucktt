@@ -4,10 +4,10 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _i3;
-import 'dart:typed_data' as _i4;
 
 import 'package:mockito/mockito.dart' as _i1;
-import 'package:value_filter/services/chinese_ocr/chinese_ocr_providers.dart' as _i2;
+import 'package:value_filter/services/chinese_ocr/chinese_ocr_providers.dart'
+    as _i2;
 import 'package:value_filter/abstract/ocr_service.dart' as _i5;
 
 // ignore_for_file: type=lint
@@ -32,8 +32,7 @@ class MockBaiduOcrService extends _i1.Mock implements _i2.BaiduOcrService {
   }
 
   @override
-  _i3.Future<_i5.OcrResult> recognize(dynamic imageData) =>
-      (super.noSuchMethod(
+  _i3.Future<_i5.OcrResult> recognize(dynamic imageData) => (super.noSuchMethod(
         Invocation.method(
           #recognize,
           [imageData],
@@ -56,8 +55,7 @@ class MockTencentOcrService extends _i1.Mock implements _i2.TencentOcrService {
   }
 
   @override
-  _i3.Future<_i5.OcrResult> recognize(dynamic imageData) =>
-      (super.noSuchMethod(
+  _i3.Future<_i5.OcrResult> recognize(dynamic imageData) => (super.noSuchMethod(
         Invocation.method(
           #recognize,
           [imageData],
