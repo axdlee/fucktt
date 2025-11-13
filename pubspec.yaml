@@ -71,6 +71,7 @@ dev_dependencies:
 
   # 测试依赖
   mockito: ^5.4.3
+  synchronized: ^3.1.0
 
 flutter:
   uses-material-design: true

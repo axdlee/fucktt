@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:synchronized/synchronized.dart';
 import 'package:value_filter/services/storage_service.dart';
 import 'package:value_filter/models/value_template_model.dart';
 import 'package:value_filter/models/ai_provider_model.dart';
@@ -10,19 +11,24 @@ import 'mocks/mock_path_provider.dart';
 /// 测试初始化配置
 class TestHelper {
   static bool _isInitialized = false;
+  static final _lock = Lock();
+  static final Set<String> _openedBoxes = {};
 
   /// 初始化测试环境
   static Future<void> initializeTestEnvironment() async {
-    if (_isInitialized) return;
+    // 使用互斥锁防止并发初始化
+    await _lock.synchronized(() async {
+      if (_isInitialized) return;
 
-    // 初始化Hive
-    await _initializeHive();
+      // 初始化Hive
+      await _initializeHive();
 
-    // 初始化存储服务
-    await StorageService.init();
+      // 注意：不再调用 StorageService.init()
+      // 每个测试应该使用独立的测试Box，避免文件锁冲突
 
-    // 设置测试环境标志
-    _isInitialized = true;
+      // 设置测试环境标志
+      _isInitialized = true;
+    });
   }
 
   /// 初始化Hive用于测试
@@ -44,17 +50,56 @@ class TestHelper {
 
   /// 清理测试环境
   static Future<void> cleanupTestEnvironment() async {
-    // 清理Hive
-    await Hive.deleteFromDisk();
-    await Hive.close();
+    await _lock.synchronized(() async {
+      // 关闭所有已打开的测试Box
+      for (final boxName in _openedBoxes.toList()) {
+        if (Hive.isBoxOpen(boxName)) {
+          try {
+            await Hive.box(boxName).close();
+          } catch (e) {
+            print('⚠️ 关闭Box失败: $boxName - $e');
+          }
+        }
+      }
+      _openedBoxes.clear();
 
-    _isInitialized = false;
+      // 重置StorageService状态
+      await StorageService.reset();
+
+      // 清理Hive
+      try {
+        await Hive.deleteFromDisk();
+        await Hive.close();
+      } catch (e) {
+        print('⚠️ 清理Hive失败: $e');
+      }
+
+      _isInitialized = false;
+    });
   }
 
   /// 创建测试用的临时Box
   static Future<Box<T>> createTestBox<T>(String name) async {
     await initializeTestEnvironment();
-    return await Hive.openBox<T>('test_$name');
+
+    return await _lock.synchronized(() async {
+      final boxName = 'test_$name';
+
+      // 如果Box已经打开，先关闭它
+      if (Hive.isBoxOpen(boxName)) {
+        try {
+          await Hive.box<T>(boxName).close();
+          _openedBoxes.remove(boxName);
+        } catch (e) {
+          print('⚠️ 关闭已存在的Box失败: $boxName - $e');
+        }
+      }
+
+      // 打开新的Box
+      final box = await Hive.openBox<T>(boxName);
+      _openedBoxes.add(boxName);
+      return box;
+    });
   }
 
   /// 创建测试数据

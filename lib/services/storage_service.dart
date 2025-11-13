@@ -13,6 +13,9 @@ class StorageService {
   factory StorageService() => _instance;
   StorageService._internal();
 
+  // 初始化状态标志
+  static bool _isInitialized = false;
+
   // Hive Box 实例
   static late Box<UserConfigModel> _userConfigBox;
   static late Box<AIProviderModel> _aiProviderBox;
@@ -21,35 +24,48 @@ class StorageService {
   static late Box<BehaviorLogModel> _behaviorLogBox;
   static late Box<ContentAnalysisResult> _analysisResultBox;
   static late Box<AIInsightModel> _aiInsightBox;
-  
+
   // 通用数据存储Box
   static late Box<dynamic> _settingsBox;
   static late Box<dynamic> _cacheBox;
 
   /// 初始化存储服务
   static Future<void> init() async {
+    // 如果已经初始化，直接返回
+    if (_isInitialized) {
+      print('📦 存储服务已初始化，跳过重复初始化');
+      return;
+    }
+
     try {
       // 注册Hive适配器
       await _registerAdapters();
-      
+
       // 打开数据库Box
       await _openBoxes();
-      
+
       // 初始化默认数据
       await _initializeDefaultData();
-      
+
+      _isInitialized = true;
       print('📦 存储服务初始化成功');
     } catch (e) {
       print('⚠️ 存储服务初始化失败: $e');
-      
+
       if (kIsWeb) {
         // Web环境下的降级处理
         print('🌐 Web环境检测到，尝试降级处理...');
         await _initializeWebFallback();
+        _isInitialized = true;
       } else {
         rethrow;
       }
     }
+  }
+
+  /// 重置存储服务（仅用于测试）
+  static Future<void> reset() async {
+    _isInitialized = false;
   }
 
   /// 注册Hive适配器
