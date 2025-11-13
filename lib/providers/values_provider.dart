@@ -1,9 +1,81 @@
 import 'package:flutter/material.dart';
+import 'package:hive_flutter/hive_flutter.dart';
 import '../models/value_template_model.dart';
 import '../services/storage_service.dart';
 
+/// 用户价值观档案模型
+class UserValuesProfile {
+  final String userId;
+  final Map<String, double> templateWeights;
+  final List<String> blacklist;
+  final List<String> whitelist;
+  final Map<String, List<String>> customCategories;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+
+  UserValuesProfile({
+    required this.userId,
+    required this.templateWeights,
+    required this.blacklist,
+    required this.whitelist,
+    required this.customCategories,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+
+  /// 创建一个新的UserValuesProfile实例，替换指定的字段
+  UserValuesProfile copyWith({
+    String? userId,
+    Map<String, double>? templateWeights,
+    List<String>? blacklist,
+    List<String>? whitelist,
+    Map<String, List<String>>? customCategories,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    return UserValuesProfile(
+      userId: userId ?? this.userId,
+      templateWeights: templateWeights ?? this.templateWeights,
+      blacklist: blacklist ?? this.blacklist,
+      whitelist: whitelist ?? this.whitelist,
+      customCategories: customCategories ?? this.customCategories,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
+  /// 转换为JSON格式
+  Map<String, dynamic> toJson() {
+    return {
+      'userId': userId,
+      'templateWeights': templateWeights,
+      'blacklist': blacklist,
+      'whitelist': whitelist,
+      'customCategories': customCategories,
+      'createdAt': createdAt.toIso8601String(),
+      'updatedAt': updatedAt.toIso8601String(),
+    };
+  }
+  
+  /// 从JSON创建实例
+  factory UserValuesProfile.fromJson(Map<String, dynamic> json) {
+    return UserValuesProfile(
+      userId: json['userId'],
+      templateWeights: Map<String, double>.from(json['templateWeights'] ?? {}),
+      blacklist: List<String>.from(json['blacklist'] ?? []),
+      whitelist: List<String>.from(json['whitelist'] ?? []),
+      customCategories: (json['customCategories'] as Map<String, dynamic>?)?.map(
+            (key, value) => MapEntry(key, List<String>.from(value)),
+          ) ?? {},
+      createdAt: DateTime.parse(json['createdAt']),
+      updatedAt: DateTime.parse(json['updatedAt']),
+    );
+  }
+}
+
 /// 价值观管理Provider - 管理用户价值观模板和偏好
 class ValuesProvider extends ChangeNotifier {
+  @visibleForTesting
   List<ValueTemplateModel> _templates = [];
   UserValuesProfile? _userProfile;
   bool _isInitialized = false;
@@ -50,6 +122,7 @@ class ValuesProvider extends ChangeNotifier {
       
       _isInitialized = true;
       _clearError();
+      notifyListeners(); // 确保初始化完成后通知监听器
     } catch (e) {
       _setError('价值观系统初始化失败: $e');
     } finally {
@@ -57,9 +130,22 @@ class ValuesProvider extends ChangeNotifier {
     }
   }
 
+  // 用于测试的Box替代方法
+  @visibleForTesting
+  Box<ValueTemplateModel>? _testBox;
+  
+  // 获取当前使用的Box（测试时可能是_testBox）
+  Box<ValueTemplateModel> get _currentBox => _testBox ?? StorageService.valueTemplateBox;
+  
+  /// 仅用于测试：设置自定义的测试Box
+  @visibleForTesting
+  void setTestBox(Box<ValueTemplateModel> box) {
+    _testBox = box;
+  }
+  
   /// 加载价值观模板
   Future<void> _loadTemplates() async {
-    final box = StorageService.valueTemplateBox;
+    final box = _currentBox;
     _templates = box.values.toList()
       ..sort((a, b) {
         // 先按分类排序，再按优先级排序
@@ -89,16 +175,32 @@ class ValuesProvider extends ChangeNotifier {
     _setLoading(true);
     
     try {
-      final box = StorageService.valueTemplateBox;
+      final box = _currentBox;
       await box.put(template.id, template);
-      await _loadTemplates();
+      
+      // 优化：直接在内存中添加模板并重新排序，避免重新加载所有数据
+      _templates.add(template);
+      _sortTemplates();
+      
       _clearError();
       notifyListeners();
     } catch (e) {
       _setError('添加价值观模板失败: $e');
+      // 出错时重新加载以确保数据一致性
+      await _loadTemplates();
     } finally {
       _setLoading(false);
     }
+  }
+  
+  /// 对模板列表进行排序的辅助方法
+  void _sortTemplates() {
+    _templates.sort((a, b) {
+      // 先按分类排序，再按优先级排序
+      final categoryCompare = a.category.compareTo(b.category);
+      if (categoryCompare != 0) return categoryCompare;
+      return a.priority.compareTo(b.priority);
+    });
   }
 
   /// 更新价值观模板
@@ -110,13 +212,26 @@ class ValuesProvider extends ChangeNotifier {
         updatedAt: DateTime.now(),
       );
       
-      final box = StorageService.valueTemplateBox;
+      final box = _currentBox;
       await box.put(updatedTemplate.id, updatedTemplate);
-      await _loadTemplates();
+      
+      // 优化：直接在内存中更新模板并重新排序，避免重新加载所有数据
+      final index = _templates.indexWhere((t) => t.id == updatedTemplate.id);
+      if (index != -1) {
+        _templates[index] = updatedTemplate;
+        _sortTemplates();
+      } else {
+        // 如果找不到模板（可能是新加的），添加并排序
+        _templates.add(updatedTemplate);
+        _sortTemplates();
+      }
+      
       _clearError();
       notifyListeners();
     } catch (e) {
       _setError('更新价值观模板失败: $e');
+      // 出错时重新加载以确保数据一致性
+      await _loadTemplates();
     } finally {
       _setLoading(false);
     }
@@ -127,7 +242,7 @@ class ValuesProvider extends ChangeNotifier {
     _setLoading(true);
     
     try {
-      final box = StorageService.valueTemplateBox;
+      final box = _currentBox;
       await box.delete(templateId);
       await _loadTemplates();
       _clearError();
@@ -394,7 +509,7 @@ class ValuesProvider extends ChangeNotifier {
     _setLoading(true);
     
     try {
-      final box = StorageService.valueTemplateBox;
+      final box = _currentBox;
       
       for (final template in templates) {
         await box.put(template.id, template);

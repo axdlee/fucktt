@@ -1,51 +1,62 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:path_provider_platform_interface/path_provider_platform_interface.dart';
+import 'package:value_filter/services/storage_service.dart';
+import 'package:value_filter/models/value_template_model.dart';
+import 'package:value_filter/models/ai_provider_model.dart';
 
 import 'mocks/mock_path_provider.dart';
 
 /// 测试初始化配置
 class TestHelper {
   static bool _isInitialized = false;
-  
+
   /// 初始化测试环境
   static Future<void> initializeTestEnvironment() async {
     if (_isInitialized) return;
-    
+
     // 初始化Hive
     await _initializeHive();
-    
+
+    // 初始化存储服务
+    await StorageService.init();
+
     // 设置测试环境标志
     _isInitialized = true;
   }
-  
+
   /// 初始化Hive用于测试
   static Future<void> _initializeHive() async {
     // 使用内存存储
     PathProviderPlatform.instance = MockPathProvider();
-    
+
     // 初始化Hive
     Hive.init('./test/temp');
-    
-    // 注册适配器（如果需要）
-    // Hive.registerAdapter(AIProviderModelAdapter());
+
+    // 预注册必要的适配器
+    if (!Hive.isAdapterRegistered(1)) {
+      Hive.registerAdapter(AIProviderModelAdapter());
+    }
+    if (!Hive.isAdapterRegistered(3)) {
+      Hive.registerAdapter(ValueTemplateModelAdapter());
+    }
   }
-  
+
   /// 清理测试环境
   static Future<void> cleanupTestEnvironment() async {
     // 清理Hive
     await Hive.deleteFromDisk();
     await Hive.close();
-    
+
     _isInitialized = false;
   }
-  
+
   /// 创建测试用的临时Box
   static Future<Box<T>> createTestBox<T>(String name) async {
     await initializeTestEnvironment();
     return await Hive.openBox<T>('test_$name');
   }
-  
+
   /// 创建测试数据
   static Map<String, dynamic> createTestAIProvider({
     String id = 'test_ai_provider',
@@ -73,7 +84,7 @@ class TestHelper {
       'updatedAt': DateTime.now().toIso8601String(),
     };
   }
-  
+
   /// 创建测试用的价值观模板
   static Map<String, dynamic> createTestValueTemplate({
     String id = 'test_value_template',
@@ -98,7 +109,7 @@ class TestHelper {
       'updatedAt': DateTime.now().toIso8601String(),
     };
   }
-  
+
   /// 创建测试用的用户配置
   static Map<String, dynamic> createTestUserConfig({
     String userId = 'test_user',
@@ -120,12 +131,12 @@ class TestHelper {
       'updatedAt': DateTime.now().toIso8601String(),
     };
   }
-  
+
   /// 等待异步操作完成
   static Future<void> waitForAsync() async {
     await Future.delayed(const Duration(milliseconds: 10));
   }
-  
+
   /// 验证所有box都已关闭
   static Future<void> verifyBoxesClosed() async {
     expect(Hive.isBoxOpen('test_ai_providers'), false);
@@ -140,40 +151,41 @@ class TestMatchers {
   static Matcher hasValidAIProviderStructure() {
     return predicate<Map<String, dynamic>>((map) {
       return map.containsKey('id') &&
-             map.containsKey('name') &&
-             map.containsKey('apiKey') &&
-             map.containsKey('baseUrl') &&
-             map.containsKey('enabled') &&
-             map['id'] is String &&
-             map['name'] is String &&
-             map['apiKey'] is String &&
-             map['baseUrl'] is String &&
-             map['enabled'] is bool;
+          map.containsKey('name') &&
+          map.containsKey('apiKey') &&
+          map.containsKey('baseUrl') &&
+          map.containsKey('enabled') &&
+          map['id'] is String &&
+          map['name'] is String &&
+          map['apiKey'] is String &&
+          map['baseUrl'] is String &&
+          map['enabled'] is bool;
     }, 'has valid AI provider structure');
   }
-  
+
   /// 验证价值观模板数据结构
   static Matcher hasValidValueTemplateStructure() {
     return predicate<Map<String, dynamic>>((map) {
       return map.containsKey('id') &&
-             map.containsKey('name') &&
-             map.containsKey('category') &&
-             map.containsKey('keywords') &&
-             map.containsKey('weight') &&
-             map['id'] is String &&
-             map['name'] is String &&
-             map['category'] is String &&
-             map['keywords'] is List &&
-             map['weight'] is double;
+          map.containsKey('name') &&
+          map.containsKey('category') &&
+          map.containsKey('keywords') &&
+          map.containsKey('weight') &&
+          map['id'] is String &&
+          map['name'] is String &&
+          map['category'] is String &&
+          map['keywords'] is List &&
+          map['weight'] is double;
     }, 'has valid value template structure');
   }
-  
+
   /// 验证URL格式
   static Matcher isValidUrl() {
     return predicate<String>((url) {
       try {
         final uri = Uri.parse(url);
-        return uri.isAbsolute && (uri.scheme == 'http' || uri.scheme == 'https');
+        return uri.isAbsolute &&
+            (uri.scheme == 'http' || uri.scheme == 'https');
       } catch (e) {
         return false;
       }
