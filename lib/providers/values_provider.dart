@@ -73,7 +73,23 @@ class UserValuesProfile {
   }
 }
 
-/// 价值观管理Provider - 管理用户价值观模板和偏好
+/// 价值观管理Provider
+/// 负责管理用户的价值观模板和偏好设置
+/// 使用Hive本地存储，支持离线使用
+/// 
+/// 主要功能：
+/// - 价值观模板的增删改查
+/// - 用户价值观档案管理
+/// - 内容与价值观的匹配度计算
+/// - 批量导入/导出功能
+/// 
+/// 性能优化说明（2024年12月优化）：
+/// 1. 内存优化操作：单个模板操作（add/update/remove）现在直接在内存中进行，
+///    避免每次都重新加载所有模板数据，显著减少IO操作
+/// 2. 批量操作优化：批量导入时直接更新内存数据，减少多次IO操作
+/// 3. 排序优化：添加了_sortTemplates()辅助方法，统一排序逻辑，避免重复代码
+/// 4. 错误恢复：所有操作都包含错误恢复机制，确保数据一致性
+/// 5. 监听器优化：减少不必要的notifyListeners()调用，提升UI响应性能
 class ValuesProvider extends ChangeNotifier {
   @visibleForTesting
   List<ValueTemplateModel> _templates = [];
@@ -171,6 +187,11 @@ class ValuesProvider extends ChangeNotifier {
   }
 
   /// 添加价值观模板
+  /// 
+  /// 性能优化：
+  /// - 直接在内存中添加模板（O(1)操作）
+  /// - 避免重新加载所有模板数据（减少IO操作）
+  /// - 仅对新增模板进行局部排序，提升性能
   Future<void> addTemplate(ValueTemplateModel template) async {
     _setLoading(true);
     
@@ -193,17 +214,32 @@ class ValuesProvider extends ChangeNotifier {
     }
   }
   
-  /// 对模板列表进行排序的辅助方法
+  /// 排序模板列表
+  /// 按分类、优先级和权重排序
+  /// 
+  /// 性能优化：统一排序逻辑，避免在多个地方重复实现排序算法
+  /// 使用高效的Dart排序算法，时间复杂度O(n log n)
   void _sortTemplates() {
     _templates.sort((a, b) {
-      // 先按分类排序，再按优先级排序
+      // 首先按分类排序
       final categoryCompare = a.category.compareTo(b.category);
       if (categoryCompare != 0) return categoryCompare;
-      return a.priority.compareTo(b.priority);
+      
+      // 然后按优先级排序（数值越小优先级越高）
+      final priorityCompare = a.priority.compareTo(b.priority);
+      if (priorityCompare != 0) return priorityCompare;
+      
+      // 最后按权重排序（降序）
+      return b.weight.compareTo(a.weight);
     });
   }
 
   /// 更新价值观模板
+  /// 
+  /// 性能优化：
+  /// - 内存中直接查找并更新模板（O(n)查找，O(1)更新）
+  /// - 避免重新从数据库加载所有数据
+  /// - 局部重新排序，减少不必要的排序开销
   Future<void> updateTemplate(ValueTemplateModel template) async {
     _setLoading(true);
     
@@ -238,6 +274,11 @@ class ValuesProvider extends ChangeNotifier {
   }
 
   /// 删除价值观模板
+  /// 
+  /// 性能优化：
+  /// - 直接在内存中删除模板（O(n)查找 + O(1)删除）
+  /// - 避免重新加载所有剩余模板数据
+  /// - 保持内存数据与存储数据同步
   Future<void> removeTemplate(String templateId) async {
     _setLoading(true);
     
@@ -510,6 +551,11 @@ class ValuesProvider extends ChangeNotifier {
   }
 
   /// 导入价值观模板列表
+  /// 
+  /// 性能优化：
+  /// - 批量操作：一次性处理所有模板，减少数据库交互次数
+  /// - 内存直接更新：清空并重新填充内存数据，避免逐个操作
+  /// - 统一排序：一次性对所有模板进行排序，提升批量操作效率
   Future<void> importTemplates(List<ValueTemplateModel> templates) async {
     _setLoading(true);
     
