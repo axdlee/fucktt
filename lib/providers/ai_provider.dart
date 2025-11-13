@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:hive/hive.dart';
 import '../models/ai_provider_model.dart';
 import '../services/ai_service_manager.dart';
 import '../services/ai_service_interface.dart';
@@ -7,13 +8,19 @@ import '../services/storage_service.dart';
 /// AI服务Provider - 管理AI服务相关状态
 class AIProvider extends ChangeNotifier {
   final AIServiceManager _serviceManager = AIServiceManager();
-  
+
   List<AIProviderModel> _providers = [];
   Map<String, bool> _healthStatus = {};
   bool _isInitialized = false;
   bool _isLoading = false;
   String? _errorMessage;
   String? _currentRequestId;
+
+  // 测试用的Box（可选）
+  Box<AIProviderModel>? _testBox;
+
+  // 测试模式标志
+  bool _isTestMode = false;
 
   // Getters
   List<AIProviderModel> get providers => List.unmodifiable(_providers);
@@ -35,24 +42,31 @@ class AIProvider extends ChangeNotifier {
   /// 初始化AI Provider
   Future<void> initialize() async {
     if (_isInitialized) return;
-    
+
     _setLoading(true);
-    
+
     try {
-      await _serviceManager.initialize();
+      // 在测试模式下，跳过AIServiceManager的初始化
+      if (!_isTestMode) {
+        await _serviceManager.initialize();
+      }
+
       await _loadProviders();
-      
+
       // 暂时移除自动添加模拟服务，避免ID冲突
       // if (_providers.isEmpty || !_providers.any((p) => p.enabled)) {
       //   await _addSimulationService();
       //   await _loadProviders();
       // }
-      
-      await _updateHealthStatus();
-      
-      // 开始定期健康检查
-      _serviceManager.startPeriodicHealthCheck();
-      
+
+      // 在测试模式下，跳过健康状态更新
+      if (!_isTestMode) {
+        await _updateHealthStatus();
+
+        // 开始定期健康检查
+        _serviceManager.startPeriodicHealthCheck();
+      }
+
       _isInitialized = true;
       _clearError();
     } catch (e) {
@@ -89,9 +103,20 @@ class AIProvider extends ChangeNotifier {
     }
   }
 
+  /// 设置测试Box（仅用于测试）
+  void setTestBox(Box<AIProviderModel> box) {
+    _testBox = box;
+    _isTestMode = true;
+  }
+
+  /// 获取当前使用的Box
+  Box<AIProviderModel> get _currentBox {
+    return _testBox ?? StorageService.aiProviderBox;
+  }
+
   /// 加载AI服务提供商
   Future<void> _loadProviders() async {
-    final box = StorageService.aiProviderBox;
+    final box = _currentBox;
     _providers = box.values.toList()
       ..sort((a, b) => a.priority.compareTo(b.priority));
   }
@@ -104,11 +129,22 @@ class AIProvider extends ChangeNotifier {
   /// 添加AI服务提供商
   Future<void> addProvider(AIProviderModel provider) async {
     _setLoading(true);
-    
+
     try {
-      await _serviceManager.addProvider(provider);
+      if (_isTestMode) {
+        // 测试模式：直接操作Box
+        await _currentBox.put(provider.id, provider);
+      } else {
+        // 正常模式：通过AIServiceManager
+        await _serviceManager.addProvider(provider);
+      }
+
       await _loadProviders();
-      await _updateHealthStatus();
+
+      if (!_isTestMode) {
+        await _updateHealthStatus();
+      }
+
       _clearError();
       notifyListeners();
     } catch (e) {
@@ -121,11 +157,22 @@ class AIProvider extends ChangeNotifier {
   /// 更新AI服务提供商
   Future<void> updateProvider(AIProviderModel provider) async {
     _setLoading(true);
-    
+
     try {
-      await _serviceManager.updateProvider(provider);
+      if (_isTestMode) {
+        // 测试模式：直接操作Box
+        await _currentBox.put(provider.id, provider);
+      } else {
+        // 正常模式：通过AIServiceManager
+        await _serviceManager.updateProvider(provider);
+      }
+
       await _loadProviders();
-      await _updateHealthStatus();
+
+      if (!_isTestMode) {
+        await _updateHealthStatus();
+      }
+
       _clearError();
       notifyListeners();
     } catch (e) {
@@ -138,11 +185,22 @@ class AIProvider extends ChangeNotifier {
   /// 删除AI服务提供商
   Future<void> removeProvider(String providerId) async {
     _setLoading(true);
-    
+
     try {
-      await _serviceManager.removeProvider(providerId);
+      if (_isTestMode) {
+        // 测试模式：直接操作Box
+        await _currentBox.delete(providerId);
+      } else {
+        // 正常模式：通过AIServiceManager
+        await _serviceManager.removeProvider(providerId);
+      }
+
       await _loadProviders();
-      await _updateHealthStatus();
+
+      if (!_isTestMode) {
+        await _updateHealthStatus();
+      }
+
       _clearError();
       notifyListeners();
     } catch (e) {

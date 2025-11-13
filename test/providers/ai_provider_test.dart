@@ -9,7 +9,14 @@ void main() {
 
     setUp(() async {
       await TestHelper.initializeTestEnvironment();
+
+      // 创建测试专用的Box
+      final testBox = await TestHelper.createTestBox<AIProviderModel>('ai_providers');
+      await testBox.clear();
+
       aiProvider = AIProvider();
+      // 设置测试Box
+      aiProvider.setTestBox(testBox);
     });
 
     tearDown(() async {
@@ -38,7 +45,7 @@ void main() {
 
     test('should add AI provider successfully', () async {
       await aiProvider.initialize();
-      
+
       final testProvider = AIProviderModel(
         id: 'test_provider',
         name: 'TestAI',
@@ -57,6 +64,9 @@ void main() {
       );
 
       await aiProvider.addProvider(testProvider);
+
+      // 等待异步操作完成
+      await Future.delayed(const Duration(milliseconds: 100));
 
       expect(aiProvider.providers.length, equals(1));
       expect(aiProvider.providers.first.id, equals(testProvider.id));

@@ -23,8 +23,9 @@ class TestHelper {
       // 初始化Hive
       await _initializeHive();
 
-      // 注意：不再调用 StorageService.init()
-      // 每个测试应该使用独立的测试Box，避免文件锁冲突
+      // 注意：不在测试环境中初始化 StorageService
+      // 原因：StorageService会打开所有Box，导致并发测试时文件锁冲突
+      // 解决方案：每个测试使用独立的测试Box
 
       // 设置测试环境标志
       _isInitialized = true;
