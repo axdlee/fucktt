@@ -44,6 +44,9 @@ class TestHelper {
     if (!Hive.isAdapterRegistered(1)) {
       Hive.registerAdapter(AIProviderModelAdapter());
     }
+    if (!Hive.isAdapterRegistered(2)) {
+      Hive.registerAdapter(ModelConfigAdapter());
+    }
     if (!Hive.isAdapterRegistered(3)) {
       Hive.registerAdapter(ValueTemplateModelAdapter());
     }

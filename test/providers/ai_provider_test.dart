@@ -65,8 +65,10 @@ void main() {
 
       await aiProvider.addProvider(testProvider);
 
-      // 等待异步操作完成
-      await Future.delayed(const Duration(milliseconds: 100));
+      // 检查是否有错误
+      if (aiProvider.errorMessage != null) {
+        print('Error: ${aiProvider.errorMessage}');
+      }
 
       expect(aiProvider.providers.length, equals(1));
       expect(aiProvider.providers.first.id, equals(testProvider.id));
