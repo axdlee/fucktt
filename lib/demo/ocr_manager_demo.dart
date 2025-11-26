@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:typed_data';
 
 import '../services/ocr_service_manager.dart';
@@ -9,10 +10,10 @@ import '../services/chinese_ocr_service.dart';
 class OCRManagerDemo {
   /// 运行完整的OCR服务演示
   static Future<void> runDemo() async {
-    print('🚀 === OCR服务管理器演示开始 ===');
-    print('📅 演示时间: ${DateTime.now()}');
-    print('🎯 目标: 展示国产OCR服务在国内的优势');
-    print('');
+    log('🚀 === OCR服务管理器演示开始 ===', name: 'ocr_manager_demo');
+    log('📅 演示时间: ${DateTime.now()}', name: 'ocr_manager_demo');
+    log('🎯 目标: 展示国产OCR服务在国内的优势', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
     final manager = OCRServiceManager.instance;
 
@@ -35,78 +36,78 @@ class OCRManagerDemo {
       // 第六步：性能对比测试
       await _performanceComparison(manager);
 
-      print('🎉 === OCR服务管理器演示完成 ===');
+      log('🎉 === OCR服务管理器演示完成 ===', name: 'ocr_manager_demo');
     } catch (e) {
-      print('❌ 演示过程中出现错误: $e');
+      log('❌ 演示过程中出现错误: $e', name: 'ocr_manager_demo');
     }
   }
 
   /// 初始化演示
   static Future<void> _initializeDemo(OCRServiceManager manager) async {
-    print('📋 第一步: 初始化OCR服务管理器');
-    print('');
+    log('📋 第一步: 初始化OCR服务管理器', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
     try {
       await manager.initialize();
-      print('✅ OCR服务管理器初始化成功');
+      log('✅ OCR服务管理器初始化成功', name: 'ocr_manager_demo');
     } catch (e) {
-      print('❌ 初始化失败: $e');
+      log('❌ 初始化失败: $e', name: 'ocr_manager_demo');
       rethrow;
     }
 
-    print('');
+    log('', name: 'ocr_manager_demo');
   }
 
   /// 显示服务状态
   static Future<void> _showServiceStatus(OCRServiceManager manager) async {
-    print('📊 第二步: 检查服务状态');
-    print('');
+    log('📊 第二步: 检查服务状态', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
     final status = manager.getStatus();
 
-    print('🌍 环境检测: ${status.isInChina ? "中国大陆" : "海外"}');
-    print('📈 整体状态: ${status.statusSummary}');
-    print('🎯 当前策略: ${status.currentStrategy.displayName}');
-    print(
+    log('🌍 环境检测: ${status.isInChina ? "中国大陆" : "海外"}', name: 'ocr_manager_demo');
+    log('📈 整体状态: ${status.statusSummary}', name: 'ocr_manager_demo');
+    log('🎯 当前策略: ${status.currentStrategy.displayName}', name: 'ocr_manager_demo');
+    log(
         '🤖 Google ML Kit: ${status.googleMLKitAvailable ? "✅ 可用" : "❌ 不可用"}');
-    print('🇨🇳 国产OCR服务: ${status.chineseOCRAvailable ? "✅ 可用" : "❌ 不可用"}');
+    log('🇨🇳 国产OCR服务: ${status.chineseOCRAvailable ? "✅ 可用" : "❌ 不可用"}', name: 'ocr_manager_demo');
 
     if (status.isInChina && !status.googleMLKitAvailable) {
-      print('');
-      print('💡 检测到您在国内环境，Google ML Kit不可用是正常现象');
-      print('   建议使用国产OCR服务，具有以下优势：');
-      print('   • 网络连接稳定');
-      print('   • 中文识别准确度高');
-      print('   • 无需Google Play服务');
-      print('   • 支持多种国产手机');
+      log('', name: 'ocr_manager_demo');
+      log('💡 检测到您在国内环境，Google ML Kit不可用是正常现象', name: 'ocr_manager_demo');
+      log('   建议使用国产OCR服务，具有以下优势：', name: 'ocr_manager_demo');
+      log('   • 网络连接稳定', name: 'ocr_manager_demo');
+      log('   • 中文识别准确度高', name: 'ocr_manager_demo');
+      log('   • 无需Google Play服务', name: 'ocr_manager_demo');
+      log('   • 支持多种国产手机', name: 'ocr_manager_demo');
     }
 
-    print('');
+    log('', name: 'ocr_manager_demo');
   }
 
   /// 显示推荐配置
   static Future<void> _showRecommendations(OCRServiceManager manager) async {
-    print('💡 第三步: 显示推荐配置');
-    print('');
+    log('💡 第三步: 显示推荐配置', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
     final recommendation = manager.getRecommendation();
 
-    print('🎯 推荐策略: ${recommendation.recommendedStrategy.displayName}');
-    print('📝 推荐理由: ${recommendation.reason}');
-    print('');
-    print('🔄 备选方案:');
+    log('🎯 推荐策略: ${recommendation.recommendedStrategy.displayName}', name: 'ocr_manager_demo');
+    log('📝 推荐理由: ${recommendation.reason}', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
+    log('🔄 备选方案:', name: 'ocr_manager_demo');
     for (final alternative in recommendation.alternatives) {
-      print('   $alternative');
+      log('   $alternative', name: 'ocr_manager_demo');
     }
 
-    print('');
+    log('', name: 'ocr_manager_demo');
   }
 
   /// 演示策略切换
   static Future<void> _demonstrateStrategySwitching(
       OCRServiceManager manager) async {
-    print('🔄 第四步: 演示策略切换');
-    print('');
+    log('🔄 第四步: 演示策略切换', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
     final strategies = [
       OCRStrategy.auto,
@@ -115,19 +116,19 @@ class OCRManagerDemo {
     ];
 
     for (final strategy in strategies) {
-      print('🔧 切换到策略: ${strategy.displayName}');
+      log('🔧 切换到策略: ${strategy.displayName}', name: 'ocr_manager_demo');
       manager.setStrategy(strategy);
 
       final status = manager.getStatus();
-      print('   当前状态: ${status.currentStrategy.displayName}');
-      print('');
+      log('   当前状态: ${status.currentStrategy.displayName}', name: 'ocr_manager_demo');
+      log('', name: 'ocr_manager_demo');
     }
   }
 
   /// 模拟OCR识别测试
   static Future<void> _simulateOCRRecognition(OCRServiceManager manager) async {
-    print('🔍 第五步: 模拟OCR识别测试');
-    print('');
+    log('🔍 第五步: 模拟OCR识别测试', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
     // 模拟今日头条内容的图片数据
     final testCases = [
@@ -149,9 +150,9 @@ class OCRManagerDemo {
     ];
 
     for (final testCase in testCases) {
-      print('📱 测试用例: ${testCase['name']}');
-      print('   类型: ${testCase['type']}');
-      print('   期望结果: ${testCase['expected']}');
+      log('📱 测试用例: ${testCase['name']}', name: 'ocr_manager_demo');
+      log('   类型: ${testCase['type']}', name: 'ocr_manager_demo');
+      log('   期望结果: ${testCase['expected']}', name: 'ocr_manager_demo');
 
       try {
         // 模拟图片数据（实际应用中这里是真实的图片字节）
@@ -160,21 +161,21 @@ class OCRManagerDemo {
         // 使用模拟的OCR结果
         final result = await _simulateOCRResult(testCase['expected'] as String);
 
-        print('   ✅ 识别结果: ${result.fullText}');
-        print('   📊 置信度: ${(result.confidence * 100).toStringAsFixed(1)}%');
-        print('   🌐 语言: ${result.language}');
+        log('   ✅ 识别结果: ${result.fullText}', name: 'ocr_manager_demo');
+        log('   📊 置信度: ${(result.confidence * 100).toStringAsFixed(1)}%', name: 'ocr_manager_demo');
+        log('   🌐 语言: ${result.language}', name: 'ocr_manager_demo');
       } catch (e) {
-        print('   ❌ 识别失败: $e');
+        log('   ❌ 识别失败: $e', name: 'ocr_manager_demo');
       }
 
-      print('');
+      log('', name: 'ocr_manager_demo');
     }
   }
 
   /// 性能对比测试
   static Future<void> _performanceComparison(OCRServiceManager manager) async {
-    print('⚡ 第六步: 性能对比测试');
-    print('');
+    log('⚡ 第六步: 性能对比测试', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
     final testText = '价值观内容过滤器测试文本';
 
@@ -185,7 +186,7 @@ class OCRManagerDemo {
     ];
 
     for (final strategy in strategies) {
-      print('🧪 测试策略: ${strategy.displayName}');
+      log('🧪 测试策略: ${strategy.displayName}', name: 'ocr_manager_demo');
       manager.setStrategy(strategy);
 
       final stopwatch = Stopwatch()..start();
@@ -195,25 +196,25 @@ class OCRManagerDemo {
         stopwatch.stop();
 
         final duration = stopwatch.elapsedMilliseconds;
-        print('   ⏱️ 识别耗时: ${duration}ms');
-        print('   📊 置信度: ${(result.confidence * 100).toStringAsFixed(1)}%');
-        print('   ✅ 状态: 成功');
+        log('   ⏱️ 识别耗时: ${duration}ms', name: 'ocr_manager_demo');
+        log('   📊 置信度: ${(result.confidence * 100).toStringAsFixed(1)}%', name: 'ocr_manager_demo');
+        log('   ✅ 状态: 成功', name: 'ocr_manager_demo');
 
         // 性能评级
         if (duration < 1000) {
-          print('   🏆 性能评级: 优秀 (< 1秒)');
+          log('   🏆 性能评级: 优秀 (< 1秒)', name: 'ocr_manager_demo');
         } else if (duration < 3000) {
-          print('   🥇 性能评级: 良好 (1-3秒)');
+          log('   🥇 性能评级: 良好 (1-3秒)', name: 'ocr_manager_demo');
         } else {
-          print('   🥉 性能评级: 一般 (> 3秒)');
+          log('   🥉 性能评级: 一般 (> 3秒)', name: 'ocr_manager_demo');
         }
       } catch (e) {
         stopwatch.stop();
-        print('   ❌ 识别失败: $e');
-        print('   ⏱️ 失败耗时: ${stopwatch.elapsedMilliseconds}ms');
+        log('   ❌ 识别失败: $e', name: 'ocr_manager_demo');
+        log('   ⏱️ 失败耗时: ${stopwatch.elapsedMilliseconds}ms', name: 'ocr_manager_demo');
       }
 
-      print('');
+      log('', name: 'ocr_manager_demo');
     }
   }
 
@@ -264,68 +265,68 @@ class OCRManagerDemo {
 
   /// 显示国产OCR服务优势说明
   static void showChineseOCRAdvantages() {
-    print('🇨🇳 === 国产OCR服务优势说明 ===');
-    print('');
+    log('🇨🇳 === 国产OCR服务优势说明 ===', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
-    print('🚀 **为什么推荐在国内使用国产OCR服务？**');
-    print('');
+    log('🚀 **为什么推荐在国内使用国产OCR服务？**', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
-    print('❌ **Google ML Kit在国内的问题：**');
-    print('   • 需要Google Play服务支持');
-    print('   • 网络连接不稳定（被墙）');
-    print('   • 模型下载经常失败');
-    print('   • 华为、小米等国产手机兼容性差');
-    print('   • 首次使用需要下载额外数据包');
-    print('');
+    log('❌ **Google ML Kit在国内的问题：**', name: 'ocr_manager_demo');
+    log('   • 需要Google Play服务支持', name: 'ocr_manager_demo');
+    log('   • 网络连接不稳定（被墙）', name: 'ocr_manager_demo');
+    log('   • 模型下载经常失败', name: 'ocr_manager_demo');
+    log('   • 华为、小米等国产手机兼容性差', name: 'ocr_manager_demo');
+    log('   • 首次使用需要下载额外数据包', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
-    print('✅ **国产OCR服务的优势：**');
-    print('   • 🌐 网络稳定：国内服务器，连接速度快');
-    print('   • 🎯 中文优化：专门针对中文优化的识别算法');
-    print('   • 💰 成本友好：大部分提供免费额度');
-    print('   • 🔧 易于集成：RESTful API，无需额外SDK');
-    print('   • 📱 兼容性好：支持所有Android设备');
-    print('   • 🛡️ 数据安全：符合国内数据安全规范');
-    print('');
+    log('✅ **国产OCR服务的优势：**', name: 'ocr_manager_demo');
+    log('   • 🌐 网络稳定：国内服务器，连接速度快', name: 'ocr_manager_demo');
+    log('   • 🎯 中文优化：专门针对中文优化的识别算法', name: 'ocr_manager_demo');
+    log('   • 💰 成本友好：大部分提供免费额度', name: 'ocr_manager_demo');
+    log('   • 🔧 易于集成：RESTful API，无需额外SDK', name: 'ocr_manager_demo');
+    log('   • 📱 兼容性好：支持所有Android设备', name: 'ocr_manager_demo');
+    log('   • 🛡️ 数据安全：符合国内数据安全规范', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
-    print('🏆 **推荐的国产OCR服务商：**');
-    print('');
+    log('🏆 **推荐的国产OCR服务商：**', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
-    print('1️⃣ **百度OCR**');
-    print('   • 免费额度：每月1000次');
-    print('   • 优势：识别准确度高，接口稳定');
-    print('   • 适用场景：个人开发者、小型项目');
-    print('');
+    log('1️⃣ **百度OCR**', name: 'ocr_manager_demo');
+    log('   • 免费额度：每月1000次', name: 'ocr_manager_demo');
+    log('   • 优势：识别准确度高，接口稳定', name: 'ocr_manager_demo');
+    log('   • 适用场景：个人开发者、小型项目', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
-    print('2️⃣ **腾讯OCR**');
-    print('   • 免费额度：每月1000次');
-    print('   • 优势：企业级稳定性，技术支持好');
-    print('   • 适用场景：商业项目、大型应用');
-    print('');
+    log('2️⃣ **腾讯OCR**', name: 'ocr_manager_demo');
+    log('   • 免费额度：每月1000次', name: 'ocr_manager_demo');
+    log('   • 优势：企业级稳定性，技术支持好', name: 'ocr_manager_demo');
+    log('   • 适用场景：商业项目、大型应用', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
-    print('3️⃣ **阿里云OCR**');
-    print('   • 免费额度：每月500次');
-    print('   • 优势：识别速度快，API功能丰富');
-    print('   • 适用场景：高并发、多样化需求');
-    print('');
+    log('3️⃣ **阿里云OCR**', name: 'ocr_manager_demo');
+    log('   • 免费额度：每月500次', name: 'ocr_manager_demo');
+    log('   • 优势：识别速度快，API功能丰富', name: 'ocr_manager_demo');
+    log('   • 适用场景：高并发、多样化需求', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
-    print('4️⃣ **科大讯飞OCR**');
-    print('   • 免费额度：每日500次');
-    print('   • 优势：本土化程度高，中文处理优秀');
-    print('   • 适用场景：教育、政府项目');
-    print('');
+    log('4️⃣ **科大讯飞OCR**', name: 'ocr_manager_demo');
+    log('   • 免费额度：每日500次', name: 'ocr_manager_demo');
+    log('   • 优势：本土化程度高，中文处理优秀', name: 'ocr_manager_demo');
+    log('   • 适用场景：教育、政府项目', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
 
-    print('💡 **使用建议：**');
-    print('   • 开发阶段：使用百度OCR（免费额度最多）');
-    print('   • 生产环境：根据QPS选择腾讯或阿里云');
-    print('   • 备用方案：配置多个服务商，自动故障转移');
-    print('   • 成本控制：合理使用缓存，避免重复识别');
-    print('');
+    log('💡 **使用建议：**', name: 'ocr_manager_demo');
+    log('   • 开发阶段：使用百度OCR（免费额度最多）', name: 'ocr_manager_demo');
+    log('   • 生产环境：根据QPS选择腾讯或阿里云', name: 'ocr_manager_demo');
+    log('   • 备用方案：配置多个服务商，自动故障转移', name: 'ocr_manager_demo');
+    log('   • 成本控制：合理使用缓存，避免重复识别', name: 'ocr_manager_demo');
+    log('', name: 'ocr_manager_demo');
   }
 }
 
 /// 主函数 - 运行OCR演示
 void main() async {
   await OCRManagerDemo.runDemo();
-  print('');
+  log('', name: 'ocr_manager_demo');
   OCRManagerDemo.showChineseOCRAdvantages();
 }

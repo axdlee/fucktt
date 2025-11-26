@@ -1,4 +1,5 @@
 import '../models/user_config_model.dart';
+import 'dart:developer';
 import 'storage_service.dart';
 
 /// 用户配置服务 - 管理用户配置的读写操作
@@ -130,7 +131,7 @@ class UserConfigService {
       }
       return false;
     } catch (e) {
-      print('导入用户配置失败: $e');
+      log('导入用户配置失败: $e');
       return false;
     }
   }

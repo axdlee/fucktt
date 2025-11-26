@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import '../models/ai_provider_model.dart';
 import '../models/prompt_template_model.dart';
 import 'storage_service.dart';
@@ -34,7 +35,7 @@ class AIServiceManager {
         final service = _createService(provider);
         _services[provider.id] = service;
       } catch (e) {
-        print('创建AI服务失败 ${provider.id}: $e');
+        log('创建AI服务失败 ${provider.id}: $e', name: 'AIServiceManager');
       }
     }
   }
@@ -213,7 +214,7 @@ class AIServiceManager {
         _healthStatus[provider.id] = isHealthy;
         _lastHealthCheck[provider.id] = DateTime.now();
       } catch (e) {
-        print('添加AI服务失败 ${provider.id}: $e');
+        log('添加AI服务失败 ${provider.id}: $e', name: 'AIServiceManager');
       }
     }
   }
@@ -242,7 +243,7 @@ class AIServiceManager {
         _healthStatus[provider.id] = isHealthy;
         _lastHealthCheck[provider.id] = DateTime.now();
       } catch (e) {
-        print('更新AI服务失败 ${provider.id}: $e');
+        log('更新AI服务失败 ${provider.id}: $e', name: 'AIServiceManager');
       }
     }
   }
@@ -268,7 +269,7 @@ class AIServiceManager {
       final service = _createService(provider);
       return await service.validateConfiguration();
     } catch (e) {
-      print('测试AI服务配置失败: $e');
+      log('测试AI服务配置失败: $e', name: 'AIServiceManager');
       return false;
     }
   }

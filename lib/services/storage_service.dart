@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/foundation.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import '../models/ai_provider_model.dart';
@@ -33,7 +34,7 @@ class StorageService {
   static Future<void> init() async {
     // 如果已经初始化，直接返回
     if (_isInitialized) {
-      print('📦 存储服务已初始化，跳过重复初始化');
+      log('存储服务已初始化，跳过重复初始化', name: 'StorageService');
       return;
     }
 
@@ -48,13 +49,13 @@ class StorageService {
       await _initializeDefaultData();
 
       _isInitialized = true;
-      print('📦 存储服务初始化成功');
+      log('存储服务初始化成功', name: 'StorageService');
     } catch (e) {
-      print('⚠️ 存储服务初始化失败: $e');
+      log('存储服务初始化失败: $e', name: 'StorageService', level: 1000);
 
       if (kIsWeb) {
         // Web环境下的降级处理
-        print('🌐 Web环境检测到，尝试降级处理...');
+        log('Web环境检测到，尝试降级处理...', name: 'StorageService');
         await _initializeWebFallback();
         _isInitialized = true;
       } else {
@@ -153,12 +154,12 @@ class StorageService {
         _analysisResultBox = await Hive.openBox<ContentAnalysisResult>('analysis_results_web');
         _aiInsightBox = await Hive.openBox<AIInsightModel>('ai_insights_web');
       } catch (e) {
-        print('🌐 Web环境下部分数据库无法初始化，将使用限定功能: $e');
+        log('Web环境下部分数据库无法初始化，将使用限定功能: $e', name: 'StorageService', level: 900);
       }
       
-      print('🌐 Web环境降级初始化完成');
+      log('Web环境降级初始化完成', name: 'StorageService');
     } catch (e) {
-      print('⚠️ Web降级初始化也失败: $e');
+      log('Web降级初始化也失败: $e', name: 'StorageService', level: 1000);
       // 最后的降级方案：创建虚拟Box
       await _createMockBoxes();
     }
@@ -168,7 +169,7 @@ class StorageService {
   static Future<void> _createMockBoxes() async {
     // 注意：这里需要创建一个简单的Mock实现
     // 在实际项目中，你可能需要使用SharedPreferences或其他Web存储方案
-    print('🔄 使用紧急模式，某些功能可能不可用');
+    log('使用紧急模式，某些功能可能不可用', name: 'StorageService', level: 900);
   }
   static Future<void> _openBoxes() async {
     _userConfigBox = await Hive.openBox<UserConfigModel>('user_config');
@@ -383,7 +384,7 @@ class StorageService {
       await _analysisResultBox.delete(result.id);
     }
 
-    print('清理了 ${expiredLogs.length} 条过期行为日志，${expiredResults.length} 条过期分析结果');
+    log('清理了 ${expiredLogs.length} 条过期行为日志，${expiredResults.length} 条过期分析结果', name: 'StorageService');
   }
 
   /// 备份数据
@@ -424,9 +425,9 @@ class StorageService {
       }
 
       // 类似地恢复其他数据...
-      print('数据恢复成功');
+      log('数据恢复成功', name: 'StorageService');
     } catch (e) {
-      print('数据恢复失败: $e');
+      log('数据恢复失败: $e', name: 'StorageService', level: 1000);
       rethrow;
     }
   }

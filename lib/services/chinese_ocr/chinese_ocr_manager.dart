@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:developer';
 import '../../abstract/ocr_service.dart';
 import 'chinese_ocr_providers.dart';
 
@@ -100,6 +101,6 @@ class ChineseOcrManager extends OcrService {
   /// 切换到指定的OCR提供商
   void switchProvider(OcrProvider provider) {
     // 实现提供商切换逻辑
-    print('切换到: ${provider.displayName}');
+    log('切换到: ${provider.displayName}', name: 'ChineseOcrManager');
   }
 }

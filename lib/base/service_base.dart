@@ -59,7 +59,5 @@ abstract class ServiceBase {
 
     // 释放具体资源
     await _disposeResources();
-
-    print('✅ 服务 $runtimeType 已释放资源');
   }
 }

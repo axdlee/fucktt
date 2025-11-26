@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'dart:developer' as dev;
 import 'dart:math';
-import 'package:crypto/crypto.dart';
 import 'package:flutter/foundation.dart';
 import '../services/storage_service.dart';
 
@@ -102,7 +102,7 @@ class SecurityService {
     await _loadAuditLog();
     
     if (kDebugMode) {
-      print('🔒 安全服务已初始化 (级别: ${_currentPolicy.level.name})');
+      dev.log('安全服务已初始化 (级别: ${_currentPolicy.level.name})', name: 'SecurityService');
     }
   }
 
@@ -127,11 +127,9 @@ class SecurityService {
     }
 
     try {
-      final key = _getEncryptionKey();
+      // final key = _getEncryptionKey(); // 简化的实现中暂时不需要
       final bytes = utf8.encode(data);
-      final hasher = Hmac(sha256, utf8.encode(key));
-      final digest = hasher.convert(bytes);
-      
+
       // 简化的加密实现（实际应用中应使用更强的加密算法）
       final encrypted = base64.encode(bytes);
       
@@ -147,7 +145,7 @@ class SecurityService {
       return encrypted;
     } catch (e) {
       if (kDebugMode) {
-        print('数据加密失败: $e');
+        dev.log('数据加密失败: $e', name: 'SecurityService', level: 900);
       }
       return data;
     }
@@ -175,7 +173,7 @@ class SecurityService {
       return decrypted;
     } catch (e) {
       if (kDebugMode) {
-        print('数据解密失败: $e');
+        dev.log('数据解密失败: $e', name: 'SecurityService', level: 900);
       }
       return encryptedData;
     }

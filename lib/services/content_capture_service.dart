@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'dart:developer';
 import '../models/behavior_model.dart';
 
 /// 内容获取服务 - 负责从今日头条应用中获取内容
@@ -25,7 +26,7 @@ class ContentCaptureService {
       
       return _isCapturing;
     } catch (e) {
-      print('启动内容捕获失败: $e');
+      log('启动内容捕获失败: $e');
       return false;
     }
   }
@@ -37,7 +38,7 @@ class ContentCaptureService {
       _isCapturing = false;
       _channel.setMethodCallHandler(null);
     } catch (e) {
-      print('停止内容捕获失败: $e');
+      log('停止内容捕获失败: $e');
     }
   }
   
@@ -47,7 +48,7 @@ class ContentCaptureService {
       final result = await _channel.invokeMethod('checkPermissions');
       return result as bool? ?? false;
     } catch (e) {
-      print('检查权限失败: $e');
+      log('检查权限失败: $e');
       return false;
     }
   }
@@ -58,7 +59,7 @@ class ContentCaptureService {
       final result = await _channel.invokeMethod('requestPermissions');
       return result as bool? ?? false;
     } catch (e) {
-      print('请求权限失败: $e');
+      log('请求权限失败: $e');
       return false;
     }
   }
@@ -69,7 +70,7 @@ class ContentCaptureService {
       final result = await _channel.invokeMethod('captureScreen');
       return result as Uint8List?;
     } catch (e) {
-      print('屏幕捕获失败: $e');
+      log('屏幕捕获失败: $e');
       return null;
     }
   }
@@ -82,7 +83,7 @@ class ContentCaptureService {
       });
       return result as String?;
     } catch (e) {
-      print('文本提取失败: $e');
+      log('文本提取失败: $e');
       return null;
     }
   }
@@ -105,7 +106,7 @@ class ContentCaptureService {
       // 解析内容结构
       return _parseContent(text, screenshot);
     } catch (e) {
-      print('屏幕分析失败: $e');
+      log('屏幕分析失败: $e');
       return [];
     }
   }
@@ -131,7 +132,7 @@ class ContentCaptureService {
         }
         break;
       default:
-        print('未知的方法调用: ${call.method}');
+        log('未知的方法调用: ${call.method}');
     }
   }
   

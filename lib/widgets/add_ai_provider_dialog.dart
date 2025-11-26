@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -78,7 +79,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
     // 关键修复：初始化当前配置的模型
     if (provider.supportedModels.isNotEmpty) {
       _selectedModelId = provider.supportedModels.first.modelId;
-      print('🎯 编辑模式：设置当前模型为 $_selectedModelId');
+      log('🎯 编辑模式：设置当前模型为 $_selectedModelId');
     }
 
     // 编辑模式下，如果有API密钥和基础URL，显示模型选择器
@@ -874,9 +875,9 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
       // 直接创建OpenAI兼容服务
       final tempService = OpenAICompatibleService(tempProvider);
 
-      print('🔍 开始获取模型列表: ${tempProvider.baseUrl}');
+      log('🔍 开始获取模型列表: ${tempProvider.baseUrl}');
       final models = await tempService.getAvailableModels();
-      print('✅ 成功获取${models.length}个模型');
+      log('✅ 成功获取${models.length}个模型');
 
       if (mounted) {
         setState(() {
@@ -887,11 +888,11 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             final modelExists =
                 models.any((m) => m.modelId == _selectedModelId);
             if (!modelExists) {
-              print('⚠️ 当前模型 $_selectedModelId 不在API返回的列表中，保持原选择');
+              log('⚠️ 当前模型 $_selectedModelId 不在API返回的列表中，保持原选择');
               // 在编辑模式下，即使模型不在新列表中，也保持当前选择
               // 不清空 _selectedModelId
             } else {
-              print('✅ 当前模型 $_selectedModelId 在API列表中，保持选中');
+              log('✅ 当前模型 $_selectedModelId 在API列表中，保持选中');
             }
           } else if (!_isEditMode &&
               _selectedModelId != null &&
@@ -916,7 +917,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
       // 清理临时服务
       tempService.dispose();
     } catch (e) {
-      print('❌ 获取模型列表失败: $e');
+      log('❌ 获取模型列表失败: $e');
       if (mounted) {
         setState(() {
           _availableModels.clear();
@@ -988,7 +989,7 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
         supportedModels: effectiveModels,
       );
 
-      print(
+      log(
           '🗺️ 测试连接使用模型: ${effectiveModels.isNotEmpty ? effectiveModels.first.modelId : "无模型"}');
 
       final result = await aiProvider.testProvider(tempProvider);
@@ -1050,13 +1051,13 @@ class _AddAIProviderDialogState extends State<AddAIProviderDialog> {
             .where((m) => m.modelId.toLowerCase().contains('deepseek'))
             .firstOrNull;
         if (deepseekModel != null) {
-          print('🎯 为 SiliconFlow 自动选择模型: ${deepseekModel.modelId}');
+          log('🎯 为 SiliconFlow 自动选择模型: ${deepseekModel.modelId}');
           return [deepseekModel];
         }
       }
 
       // 否则选择第一个可用模型
-      print('🎯 自动选择第一个模型: ${_availableModels.first.modelId}');
+      log('🎯 自动选择第一个模型: ${_availableModels.first.modelId}');
       return [_availableModels.first];
     }
 

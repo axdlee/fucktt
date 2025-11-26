@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
 import 'package:crypto/crypto.dart';
@@ -55,13 +56,13 @@ class ChineseOCRService {
     };
     
     _isInitialized = true;
-    print('🇨🇳 国产OCR服务初始化成功 (当前提供商: ${_currentProvider.name})');
+    log('🇨🇳 国产OCR服务初始化成功 (当前提供商: ${_currentProvider.name})');
   }
   
   /// 设置OCR提供商
   void setProvider(OCRProvider provider) {
     _currentProvider = provider;
-    print('🔄 切换OCR提供商到: ${provider.name}');
+    log('🔄 切换OCR提供商到: ${provider.name}');
   }
   
   /// 从图片中提取文本（主入口）
@@ -82,7 +83,7 @@ class ChineseOCRService {
           return await _localOCR(imageData);
       }
     } catch (e) {
-      print('⚠️ OCR识别失败，尝试切换提供商: $e');
+      log('⚠️ OCR识别失败，尝试切换提供商: $e');
       return await _fallbackOCR(imageData);
     }
   }
@@ -235,7 +236,7 @@ class ChineseOCRService {
     // 2. PaddleOCR移动端版本  
     // 3. 其他开源OCR解决方案
     
-    print('📱 使用本地离线OCR (开发中)');
+    log('📱 使用本地离线OCR (开发中)');
     
     // 模拟本地OCR结果
     return OCRResult(
@@ -268,11 +269,11 @@ class ChineseOCRService {
       if (provider == _currentProvider) continue;
       
       try {
-        print('🔄 尝试故障转移到: ${provider.name}');
+        log('🔄 尝试故障转移到: ${provider.name}');
         setProvider(provider);
         return await extractTextFromImage(imageData);
       } catch (e) {
-        print('❌ ${provider.name} 也失败了: $e');
+        log('❌ ${provider.name} 也失败了: $e');
         continue;
       }
     }

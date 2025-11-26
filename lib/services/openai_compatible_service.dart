@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 import 'dart:async';
 import 'package:dio/dio.dart';
 import '../models/ai_provider_model.dart';
@@ -57,16 +58,16 @@ class OpenAICompatibleService implements AIService {
       final request = _buildChatRequest(prompt, model, parameters);
       
       // 调试日志：打印请求信息
-      print('🚀 AI请求: ${_provider.name}');
-      print('🎯 模型: $model');
-      print('📦 请求URL: ${_provider.baseUrl}/chat/completions');
+      log('🚀 AI请求: ${_provider.name}');
+      log('🎯 模型: $model');
+      log('📦 请求URL: ${_provider.baseUrl}/chat/completions');
       
       final response = await _dio.post('/chat/completions', data: request);
       
       if (response.statusCode == 200) {
         final result = _parseResponse(response.data, model);
-        print('🎯 响应内容: ${result.content}');
-        print('✅ AI响应成功: ${result.content.length}字符');
+        log('🎯 响应内容: ${result.content}');
+        log('✅ AI响应成功: ${result.content.length}字符');
         return result;
       } else {
         throw AIServiceException(
@@ -75,16 +76,16 @@ class OpenAICompatibleService implements AIService {
         );
       }
     } on DioException catch (e) {
-      print('❌ AI请求失败: ${_handleDioError(e)}');
+      log('❌ AI请求失败: ${_handleDioError(e)}');
       if (e.response?.data != null) {
-        print('❌ 错误响应: ${e.response!.data}');
+        log('❌ 错误响应: ${e.response!.data}');
       }
       throw AIServiceException(
         _handleDioError(e),
         code: e.response?.statusCode.toString(),
       );
     } catch (e) {
-      print('❌ AI请求异常: $e');
+      log('❌ AI请求异常: $e');
       throw AIServiceException('请求失败: $e');
     }
   }

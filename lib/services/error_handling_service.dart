@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import '../services/storage_service.dart';
@@ -105,7 +106,7 @@ class ErrorHandlingService {
     await _loadErrorHistory();
 
     if (kDebugMode) {
-      print('🛡️ 错误处理服务已初始化');
+      log('🛡️ 错误处理服务已初始化');
     }
   }
 
@@ -165,7 +166,7 @@ class ErrorHandlingService {
     _handleErrorBySeverity(error);
 
     if (kDebugMode) {
-      print('❌ 错误记录: [${error.type.name}] ${error.message}');
+      log('❌ 错误记录: [${error.type.name}] ${error.message}');
     }
   }
 
@@ -369,7 +370,7 @@ class ErrorHandlingService {
     // 在实际应用中，这里需要获取BuildContext
     // 这里仅作为示例
     if (kDebugMode) {
-      print('🚨 关键错误: ${error.message}');
+      log('🚨 关键错误: ${error.message}');
     }
   }
 
@@ -378,7 +379,7 @@ class ErrorHandlingService {
     // 在实际应用中，这里需要获取ScaffoldMessenger
     // 这里仅作为示例
     if (kDebugMode) {
-      print('⚠️ 错误提示: ${error.message}');
+      log('⚠️ 错误提示: ${error.message}');
     }
   }
 
@@ -411,7 +412,7 @@ class ErrorHandlingService {
     try {
       if (!_isStorageAvailable()) {
         if (kDebugMode) {
-          print('💾 存储服务不可用，跳过错误日志保存');
+          log('💾 存储服务不可用，跳过错误日志保存');
         }
         return;
       }
@@ -428,7 +429,7 @@ class ErrorHandlingService {
       await box.put(storageKey, existingLogs);
     } catch (e) {
       if (kDebugMode) {
-        print('保存错误日志失败: $e');
+        log('保存错误日志失败: $e');
       }
     }
   }
@@ -438,7 +439,7 @@ class ErrorHandlingService {
     try {
       if (!_isStorageAvailable()) {
         if (kDebugMode) {
-          print('💾 存储服务不可用，跳过加载错误历史');
+          log('💾 存储服务不可用，跳过加载错误历史');
         }
         return;
       }
@@ -451,7 +452,7 @@ class ErrorHandlingService {
       
     } catch (e) {
       if (kDebugMode) {
-        print('加载错误历史失败: $e');
+        log('加载错误历史失败: $e');
       }
     }
   }
@@ -461,7 +462,7 @@ class ErrorHandlingService {
     try {
       if (!_isStorageAvailable()) {
         if (kDebugMode) {
-          print('💾 存储服务不可用，跳过保存错误历史');
+          log('💾 存储服务不可用，跳过保存错误历史');
         }
         return;
       }
@@ -471,7 +472,7 @@ class ErrorHandlingService {
       await box.put(storageKey, logs);
     } catch (e) {
       if (kDebugMode) {
-        print('保存错误历史失败: $e');
+        log('保存错误历史失败: $e');
       }
     }
   }

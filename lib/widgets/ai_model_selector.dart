@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 
@@ -444,7 +445,7 @@ class _AIModelSelectorState extends State<AIModelSelector> {
             return;
           }
         } catch (e) {
-          print('获取模型列表失败: $e');
+          log('获取模型列表失败: $e');
         }
       }
 

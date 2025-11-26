@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer';
 import 'package:provider/provider.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
@@ -55,7 +56,7 @@ class _HomePageState extends State<HomePage> {
         await contentProvider.initialize();
       }
     } catch (e) {
-      print('Provider初始化失败: $e');
+      log('Provider初始化失败: $e');
     }
   }
 

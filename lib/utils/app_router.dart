@@ -6,7 +6,10 @@ import '../pages/values_config_page.dart';
 import '../pages/ai_config_page.dart';
 import '../pages/test_page.dart';
 import '../pages/filter_simulation_page.dart';
-import '../pages/placeholder_pages.dart';
+import '../pages/prompt_management_page.dart';
+import '../pages/filter_history_page.dart';
+import '../pages/settings_page.dart';
+import '../pages/about_page.dart';
 import '../pages/ocr_config_page.dart';
 import '../constants/app_constants.dart';
 

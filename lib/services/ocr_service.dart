@@ -1,4 +1,5 @@
 import 'package:google_ml_kit/google_ml_kit.dart';
+import 'dart:developer';
 import 'package:flutter/services.dart';
 
 import 'ocr_service_manager.dart';
@@ -25,10 +26,10 @@ class OCRService {
       // 优先尝试初始化Google ML Kit
       _textRecognizer = TextRecognizer(script: TextRecognitionScript.chinese);
       _isInitialized = true;
-      print('✅ Google ML Kit OCR服务初始化成功');
+      log('✅ Google ML Kit OCR服务初始化成功');
     } catch (e) {
-      print('⚠️ Google ML Kit OCR服务初始化失败: $e');
-      print('💡 这在国内是正常现象，将使用国产OCR服务作为替代');
+      log('⚠️ Google ML Kit OCR服务初始化失败: $e');
+      log('💡 这在国内是正常现象，将使用国产OCR服务作为替代');
       _isInitialized = false;
       throw Exception('Google ML Kit OCR服务初始化失败');
     }
@@ -58,7 +59,7 @@ class OCRService {
       // 解析结果
       return _parseRecognitionResult(recognizedText);
     } catch (e) {
-      print('文本识别失败: $e');
+      log('文本识别失败: $e');
       return OCRResult(
         fullText: '',
         textBlocks: [],
@@ -79,7 +80,7 @@ class OCRService {
       final recognizedText = await _textRecognizer.processImage(inputImage);
       return _parseRecognitionResult(recognizedText);
     } catch (e) {
-      print('从文件识别文本失败: $e');
+      log('从文件识别文本失败: $e');
       return OCRResult(
         fullText: '',
         textBlocks: [],
@@ -98,7 +99,7 @@ class OCRService {
         final result = await extractTextFromImage(imageData);
         results.add(result);
       } catch (e) {
-        print('批量识别中的图片处理失败: $e');
+        log('批量识别中的图片处理失败: $e');
         results.add(OCRResult(
           fullText: '',
           textBlocks: [],
@@ -217,7 +218,7 @@ class OCRService {
         language: result.language,
       );
     } catch (e) {
-      print('区域文本提取失败: $e');
+      log('区域文本提取失败: $e');
       rethrow;
     }
   }

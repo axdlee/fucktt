@@ -28,7 +28,7 @@ dependencies:
   material_color_utilities: ^0.11.1
   
   # 路由管理
-  go_router: ^16.2.0
+  go_router: ^17.0.0
   
   # 工具类
   shared_preferences: ^2.2.2
@@ -52,10 +52,13 @@ dependencies:
   intl: ^0.20.2
   
   # 动画
-  animations: ^2.0.8
+  animations: ^2.1.1
   
   # 屏幕适配
   flutter_screenutil: ^5.9.0
+
+  # 图像处理
+  image: ^4.1.3
 
 dev_dependencies:
   flutter_test:
@@ -64,8 +67,8 @@ dev_dependencies:
   # 代码生成
   build_runner: ^2.4.7
   hive_generator: ^2.0.1
-  json_serializable: ^6.7.1
-  
+  json_serializable: ^6.8.0
+
   # 代码分析
   flutter_lints: ^6.0.0
 

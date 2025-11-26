@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -92,7 +93,7 @@ class PerformanceService {
     }
     
     if (warnings.isNotEmpty && kDebugMode) {
-      print('⚠️ 性能警告: ${warnings.join(', ')}');
+      log('⚠️ 性能警告: ${warnings.join(', ')}');
     }
   }
   
@@ -117,7 +118,7 @@ class PerformanceService {
       
     } catch (e) {
       if (kDebugMode) {
-        print('系统设置优化失败: $e');
+        log('系统设置优化失败: $e');
       }
     }
   }
@@ -157,7 +158,7 @@ class PerformanceService {
     }
     
     if (kDebugMode) {
-      print('🧹 缓存清理完成，当前缓存项: ${_memoryCache.length}');
+      log('🧹 缓存清理完成，当前缓存项: ${_memoryCache.length}');
     }
   }
   
@@ -207,11 +208,11 @@ class PerformanceService {
       await _preloadValueTemplates();
       
       if (kDebugMode) {
-        print('🚀 数据预加载完成');
+        log('🚀 数据预加载完成');
       }
     } catch (e) {
       if (kDebugMode) {
-        print('❌ 数据预加载失败: $e');
+        log('❌ 数据预加载失败: $e');
       }
     }
   }
@@ -224,7 +225,7 @@ class PerformanceService {
         final config = StorageService.settingsBox.toMap();
         cacheData(key, config);
       } catch (e) {
-        if (kDebugMode) print('预加载用户配置失败: $e');
+        if (kDebugMode) log('预加载用户配置失败: $e');
       }
     }
   }
@@ -237,7 +238,7 @@ class PerformanceService {
         final providers = StorageService.aiProviderBox.values.toList();
         cacheData(key, providers);
       } catch (e) {
-        if (kDebugMode) print('预加载AI提供商失败: $e');
+        if (kDebugMode) log('预加载AI提供商失败: $e');
       }
     }
   }
@@ -250,7 +251,7 @@ class PerformanceService {
         final templates = StorageService.valueTemplateBox.values.toList();
         cacheData(key, templates);
       } catch (e) {
-        if (kDebugMode) print('预加载价值观模板失败: $e');
+        if (kDebugMode) log('预加载价值观模板失败: $e');
       }
     }
   }
@@ -268,7 +269,7 @@ class PerformanceService {
       return await compute(callback, message);
     } catch (e) {
       if (kDebugMode) {
-        print('隔离线程任务执行失败: $e');
+        log('隔离线程任务执行失败: $e');
       }
       rethrow;
     }
@@ -325,7 +326,7 @@ class PerformanceService {
   void clearAllCache() {
     _memoryCache.clear();
     if (kDebugMode) {
-      print('🗑️ 所有缓存已清空');
+      log('🗑️ 所有缓存已清空');
     }
   }
   

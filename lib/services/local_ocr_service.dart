@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:developer';
 import 'dart:isolate';
 import 'dart:math' as math;
 import 'package:flutter/services.dart';
@@ -22,7 +23,7 @@ class LocalOCRService {
     if (_isInitialized) return;
 
     try {
-      print('🏠 初始化本地离线OCR服务...');
+      log('🏠 初始化本地离线OCR服务...');
 
       // 1. 检查设备能力
       await _checkDeviceCapabilities();
@@ -34,9 +35,9 @@ class LocalOCRService {
       await _initializeEngine(_currentEngine);
 
       _isInitialized = true;
-      print('✅ 本地OCR服务初始化成功 (引擎: ${_currentEngine.displayName})');
+      log('✅ 本地OCR服务初始化成功 (引擎: ${_currentEngine.displayName})');
     } catch (e) {
-      print('❌ 本地OCR服务初始化失败: $e');
+      log('❌ 本地OCR服务初始化失败: $e');
       throw Exception('本地OCR服务初始化失败');
     }
   }
@@ -59,7 +60,7 @@ class LocalOCRService {
           return await _customOCR(imageData);
       }
     } catch (e) {
-      print('❌ 本地OCR识别失败: $e');
+      log('❌ 本地OCR识别失败: $e');
       // 尝试降级到其他引擎
       return await _fallbackOCR(imageData);
     }
@@ -69,13 +70,13 @@ class LocalOCRService {
   Future<void> _checkDeviceCapabilities() async {
     // 检查可用内存
     if (Platform.isAndroid || Platform.isIOS) {
-      print('📱 移动设备检测: 适合轻量级OCR模型');
+      log('📱 移动设备检测: 适合轻量级OCR模型');
     }
 
     // 检查存储空间
     final directory = await getApplicationDocumentsDirectory();
     final stat = await directory.stat();
-    print('💾 存储状态检查完成');
+    log('💾 存储状态检查完成');
   }
 
   /// 选择最佳OCR引擎
@@ -119,9 +120,9 @@ class LocalOCRService {
     try {
       // 复制模型文件到本地
       await _copyModelFromAssets('assets/models/ocr_model.tflite');
-      print('✅ TensorFlow Lite模型加载成功');
+      log('✅ TensorFlow Lite模型加载成功');
     } catch (e) {
-      print('⚠️ TensorFlow Lite初始化失败: $e');
+      log('⚠️ TensorFlow Lite初始化失败: $e');
     }
   }
 
@@ -142,9 +143,9 @@ class LocalOCRService {
     try {
       // PaddleOCR mobile模型初始化
       await _copyModelFromAssets('assets/models/paddle_ocr_mobile.nb');
-      print('✅ PaddleOCR模型加载成功');
+      log('✅ PaddleOCR模型加载成功');
     } catch (e) {
-      print('⚠️ PaddleOCR初始化失败: $e');
+      log('⚠️ PaddleOCR初始化失败: $e');
     }
   }
 
@@ -161,9 +162,9 @@ class LocalOCRService {
       // 复制Tesseract语言包
       await _copyModelFromAssets('assets/tessdata/chi_sim.traineddata');
       await _copyModelFromAssets('assets/tessdata/eng.traineddata');
-      print('✅ Tesseract语言包加载成功');
+      log('✅ Tesseract语言包加载成功');
     } catch (e) {
-      print('⚠️ Tesseract初始化失败: $e');
+      log('⚠️ Tesseract初始化失败: $e');
     }
   }
 
@@ -182,11 +183,11 @@ class LocalOCRService {
   Future<void> _initializeMLKitOffline() async {
     try {
       // 下载离线模型
-      print('📥 下载ML Kit离线模型...');
+      log('📥 下载ML Kit离线模型...');
       await Future.delayed(Duration(seconds: 2)); // 模拟下载
-      print('✅ ML Kit离线模型准备完成');
+      log('✅ ML Kit离线模型准备完成');
     } catch (e) {
-      print('⚠️ ML Kit离线模式初始化失败: $e');
+      log('⚠️ ML Kit离线模式初始化失败: $e');
     }
   }
 
@@ -198,7 +199,7 @@ class LocalOCRService {
 
   /// 自定义OCR引擎
   Future<void> _initializeCustomEngine() async {
-    print('🔧 初始化自定义OCR引擎...');
+    log('🔧 初始化自定义OCR引擎...');
   }
 
   Future<LocalOCRResult> _customOCR(Uint8List imageData) async {
@@ -213,12 +214,12 @@ class LocalOCRService {
 
     for (final engine in fallbackEngines) {
       try {
-        print('🔄 故障转移到: ${engine.displayName}');
+        log('🔄 故障转移到: ${engine.displayName}');
         _currentEngine = engine;
         await _initializeEngine(engine);
         return await extractText(imageData);
       } catch (e) {
-        print('❌ ${engine.displayName} 也失败了: $e');
+        log('❌ ${engine.displayName} 也失败了: $e');
         continue;
       }
     }
@@ -238,13 +239,13 @@ class LocalOCRService {
         final bytes = await rootBundle.load(assetPath);
         await localFile.writeAsBytes(bytes.buffer.asUint8List());
         _modelPath = localFile.path;
-        print('📥 模型文件复制完成: $fileName');
+        log('📥 模型文件复制完成: $fileName');
       } else {
         _modelPath = localFile.path;
-        print('✅ 模型文件已存在: $fileName');
+        log('✅ 模型文件已存在: $fileName');
       }
     } catch (e) {
-      print('⚠️ 模型文件复制失败: $e (使用内置模拟)');
+      log('⚠️ 模型文件复制失败: $e (使用内置模拟)');
     }
   }
 
@@ -323,7 +324,7 @@ class LocalOCRService {
   Future<void> dispose() async {
     _isInitialized = false;
     _modelPath = null;
-    print('🗑️ 本地OCR服务资源已释放');
+    log('🗑️ 本地OCR服务资源已释放');
   }
 }
 

@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import '../models/ai_provider_model.dart';
@@ -97,9 +98,9 @@ class AIProvider extends ChangeNotifier {
     
     try {
       await _serviceManager.addProvider(simulationProvider);
-      print('✅ 已自动添加模拟AI服务用于测试');
+      log('已自动添加模拟AI服务用于测试', name: 'AIProvider');
     } catch (e) {
-      print('⚠️ 添加模拟AI服务失败: $e');
+      log('添加模拟AI服务失败: $e', name: 'AIProvider', level: 900);
     }
   }
 

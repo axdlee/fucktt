@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'dart:developer';
 import 'package:permission_handler/permission_handler.dart';
 
 /// 权限类型枚举
@@ -59,7 +60,7 @@ class PermissionService {
       final status = await Permission.storage.status;
       return status.isGranted;
     } catch (e) {
-      print('检查存储权限失败: $e');
+      log('检查存储权限失败: $e');
       return false;
     }
   }
@@ -70,7 +71,7 @@ class PermissionService {
       final status = await Permission.storage.request();
       return status.isGranted;
     } catch (e) {
-      print('请求存储权限失败: $e');
+      log('请求存储权限失败: $e');
       return false;
     }
   }
@@ -81,7 +82,7 @@ class PermissionService {
       final status = await Permission.notification.status;
       return status.isGranted;
     } catch (e) {
-      print('检查通知权限失败: $e');
+      log('检查通知权限失败: $e');
       return false;
     }
   }
@@ -92,7 +93,7 @@ class PermissionService {
       final status = await Permission.notification.request();
       return status.isGranted;
     } catch (e) {
-      print('请求通知权限失败: $e');
+      log('请求通知权限失败: $e');
       return false;
     }
   }
@@ -103,7 +104,7 @@ class PermissionService {
       final result = await _channel.invokeMethod('checkAccessibilityPermission');
       return result as bool? ?? false;
     } catch (e) {
-      print('检查无障碍权限失败: $e');
+      log('检查无障碍权限失败: $e');
       return false;
     }
   }
@@ -114,7 +115,7 @@ class PermissionService {
       final result = await _channel.invokeMethod('requestAccessibilityPermission');
       return result as bool? ?? false;
     } catch (e) {
-      print('请求无障碍权限失败: $e');
+      log('请求无障碍权限失败: $e');
       return false;
     }
   }
@@ -125,7 +126,7 @@ class PermissionService {
       final result = await _channel.invokeMethod('checkOverlayPermission');
       return result as bool? ?? false;
     } catch (e) {
-      print('检查悬浮窗权限失败: $e');
+      log('检查悬浮窗权限失败: $e');
       return false;
     }
   }
@@ -136,7 +137,7 @@ class PermissionService {
       final result = await _channel.invokeMethod('requestOverlayPermission');
       return result as bool? ?? false;
     } catch (e) {
-      print('请求悬浮窗权限失败: $e');
+      log('请求悬浮窗权限失败: $e');
       return false;
     }
   }
@@ -157,7 +158,7 @@ class PermissionService {
     try {
       await openAppSettings();
     } catch (e) {
-      print('打开应用设置失败: $e');
+      log('打开应用设置失败: $e');
     }
   }
   
@@ -166,7 +167,7 @@ class PermissionService {
     try {
       await _channel.invokeMethod('openAccessibilitySettings');
     } catch (e) {
-      print('打开无障碍设置失败: $e');
+      log('打开无障碍设置失败: $e');
     }
   }
   
@@ -175,7 +176,7 @@ class PermissionService {
     try {
       await _channel.invokeMethod('openOverlaySettings');
     } catch (e) {
-      print('打开悬浮窗设置失败: $e');
+      log('打开悬浮窗设置失败: $e');
     }
   }
   

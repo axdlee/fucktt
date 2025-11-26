@@ -1,4 +1,5 @@
 import 'dart:typed_data';
+import 'dart:developer';
 import 'package:flutter/foundation.dart';
 
 import 'ocr_service.dart';
@@ -33,7 +34,7 @@ class OCRServiceManager {
 
   /// 初始化OCR服务管理器
   Future<void> initialize() async {
-    print('🔧 OCR服务管理器初始化开始...');
+    log('🔧 OCR服务管理器初始化开始...');
 
     // 检测Google ML Kit可用性
     await _checkGoogleMLKitAvailability();
@@ -44,10 +45,10 @@ class OCRServiceManager {
     // 根据可用性选择最佳策略
     _selectBestStrategy();
 
-    print('✅ OCR服务管理器初始化完成');
-    print('📊 Google ML Kit: ${_googleMLKitAvailable ? "可用" : "不可用"}');
-    print('📊 国产OCR服务: ${_chineseOCRAvailable ? "可用" : "不可用"}');
-    print('🎯 当前策略: ${_currentStrategy.displayName}');
+    log('✅ OCR服务管理器初始化完成');
+    log('📊 Google ML Kit: ${_googleMLKitAvailable ? "可用" : "不可用"}');
+    log('📊 国产OCR服务: ${_chineseOCRAvailable ? "可用" : "不可用"}');
+    log('🎯 当前策略: ${_currentStrategy.displayName}');
   }
 
   /// 检测Google ML Kit可用性
@@ -55,19 +56,19 @@ class OCRServiceManager {
     try {
       await _googleMLKitService.initialize();
       _googleMLKitAvailable = true;
-      print('✅ Google ML Kit 可用');
+      log('✅ Google ML Kit 可用');
     } catch (e) {
       _googleMLKitAvailable = false;
-      print('❌ Google ML Kit 不可用: $e');
+      log('❌ Google ML Kit 不可用: $e');
 
       // 常见的Google ML Kit问题诊断
       if (e.toString().contains('Google Play')) {
-        print('💡 建议: 设备缺少Google Play服务，推荐使用国产OCR');
+        log('💡 建议: 设备缺少Google Play服务，推荐使用国产OCR');
       } else if (e.toString().contains('network') ||
           e.toString().contains('timeout')) {
-        print('💡 建议: 网络连接问题，可能需要科学上网或使用国产OCR');
+        log('💡 建议: 网络连接问题，可能需要科学上网或使用国产OCR');
       } else if (e.toString().contains('model')) {
-        print('💡 建议: ML Kit模型下载失败，建议使用国产OCR');
+        log('💡 建议: ML Kit模型下载失败，建议使用国产OCR');
       }
     }
   }
@@ -77,10 +78,10 @@ class OCRServiceManager {
     try {
       await _chineseOCRService.initialize();
       _chineseOCRAvailable = true;
-      print('✅ 国产OCR服务 可用');
+      log('✅ 国产OCR服务 可用');
     } catch (e) {
       _chineseOCRAvailable = false;
-      print('❌ 国产OCR服务 不可用: $e');
+      log('❌ 国产OCR服务 不可用: $e');
     }
   }
 
@@ -93,13 +94,13 @@ class OCRServiceManager {
     // 在中国大陆，优先使用国产OCR
     if (_isInChina() && _chineseOCRAvailable) {
       _currentStrategy = OCRStrategy.chineseOnly;
-      print('🇨🇳 检测到中国大陆环境，优先使用国产OCR');
+      log('🇨🇳 检测到中国大陆环境，优先使用国产OCR');
     } else if (_googleMLKitAvailable) {
       _currentStrategy = OCRStrategy.googleFirst;
-      print('🌍 使用Google ML Kit优先策略');
+      log('🌍 使用Google ML Kit优先策略');
     } else if (_chineseOCRAvailable) {
       _currentStrategy = OCRStrategy.chineseOnly;
-      print('🔄 Google ML Kit不可用，使用国产OCR');
+      log('🔄 Google ML Kit不可用，使用国产OCR');
     }
   }
 
@@ -117,7 +118,7 @@ class OCRServiceManager {
   /// 设置OCR策略
   void setStrategy(OCRStrategy strategy) {
     _currentStrategy = strategy;
-    print('🔄 OCR策略切换为: ${strategy.displayName}');
+    log('🔄 OCR策略切换为: ${strategy.displayName}');
   }
 
   /// 主要的OCR识别接口
@@ -146,7 +147,7 @@ class OCRServiceManager {
       throw Exception('Google ML Kit 不可用');
     }
 
-    print('🔍 使用Google ML Kit进行OCR识别');
+    log('🔍 使用Google ML Kit进行OCR识别');
     return await _googleMLKitService.extractTextFromImage(imageData);
   }
 
@@ -156,7 +157,7 @@ class OCRServiceManager {
       throw Exception('国产OCR服务不可用');
     }
 
-    print('🔍 使用国产OCR服务进行识别');
+    log('🔍 使用国产OCR服务进行识别');
     // 获取国产OCR服务的结果并适配为主要OCRResult类型
     final chineseResult = await _chineseOCRService.extractTextFromImage(imageData);
     
@@ -169,11 +170,11 @@ class OCRServiceManager {
   Future<OCRResult> _extractWithGoogleFirst(Uint8List imageData) async {
     try {
       if (_googleMLKitAvailable) {
-        print('🔍 优先尝试Google ML Kit');
+        log('🔍 优先尝试Google ML Kit');
         return await _googleMLKitService.extractTextFromImage(imageData);
       }
     } catch (e) {
-      print('⚠️ Google ML Kit失败，切换到国产OCR: $e');
+      log('⚠️ Google ML Kit失败，切换到国产OCR: $e');
     }
 
     if (_chineseOCRAvailable) {
@@ -189,13 +190,13 @@ class OCRServiceManager {
   Future<OCRResult> _extractWithChineseFirst(Uint8List imageData) async {
     try {
       if (_chineseOCRAvailable) {
-        print('🔍 优先尝试国产OCR服务');
+        log('🔍 优先尝试国产OCR服务');
         // 获取国产OCR服务的结果并转换为主要OCRResult类型
         final chineseResult = await _chineseOCRService.extractTextFromImage(imageData);
         return chineseResult as OCRResult;
       }
     } catch (e) {
-      print('⚠️ 国产OCR失败，切换到Google ML Kit: $e');
+      log('⚠️ 国产OCR失败，切换到Google ML Kit: $e');
     }
 
     if (_googleMLKitAvailable) {

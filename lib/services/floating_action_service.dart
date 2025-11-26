@@ -1,4 +1,5 @@
 import 'package:flutter/services.dart';
+import 'dart:developer';
 import '../models/behavior_model.dart';
 import '../services/content_capture_service.dart';
 
@@ -26,7 +27,7 @@ class FloatingActionService {
       
       return _isFloatingWindowShown;
     } catch (e) {
-      print('显示悬浮窗失败: $e');
+      log('显示悬浮窗失败: $e');
       return false;
     }
   }
@@ -38,7 +39,7 @@ class FloatingActionService {
       _isFloatingWindowShown = false;
       _channel.setMethodCallHandler(null);
     } catch (e) {
-      print('隐藏悬浮窗失败: $e');
+      log('隐藏悬浮窗失败: $e');
     }
   }
   
@@ -50,7 +51,7 @@ class FloatingActionService {
         'y': y,
       });
     } catch (e) {
-      print('更新悬浮窗位置失败: $e');
+      log('更新悬浮窗位置失败: $e');
     }
   }
   
@@ -61,7 +62,7 @@ class FloatingActionService {
         'opacity': opacity,
       });
     } catch (e) {
-      print('更新悬浮窗透明度失败: $e');
+      log('更新悬浮窗透明度失败: $e');
     }
   }
   
@@ -70,7 +71,7 @@ class FloatingActionService {
     try {
       await _channel.invokeMethod('showQuickMenu');
     } catch (e) {
-      print('显示快捷菜单失败: $e');
+      log('显示快捷菜单失败: $e');
     }
   }
   
@@ -79,7 +80,7 @@ class FloatingActionService {
     try {
       await _channel.invokeMethod('hideQuickMenu');
     } catch (e) {
-      print('隐藏快捷菜单失败: $e');
+      log('隐藏快捷菜单失败: $e');
     }
   }
   
@@ -99,7 +100,7 @@ class FloatingActionService {
         'timestamp': DateTime.now(),
       });
     } catch (e) {
-      print('举报内容失败: $e');
+      log('举报内容失败: $e');
     }
   }
   
@@ -119,7 +120,7 @@ class FloatingActionService {
         'timestamp': DateTime.now(),
       });
     } catch (e) {
-      print('屏蔽内容失败: $e');
+      log('屏蔽内容失败: $e');
     }
   }
   
@@ -139,7 +140,7 @@ class FloatingActionService {
         'timestamp': DateTime.now(),
       });
     } catch (e) {
-      print('标记内容失败: $e');
+      log('标记内容失败: $e');
     }
   }
   
@@ -152,7 +153,7 @@ class FloatingActionService {
       }
       return null;
     } catch (e) {
-      print('获取当前内容失败: $e');
+      log('获取当前内容失败: $e');
       return null;
     }
   }
@@ -179,7 +180,7 @@ class FloatingActionService {
         _onActionCallback?.call('positionChanged', {'x': x, 'y': y});
         break;
       default:
-        print('未知的方法调用: ${call.method}');
+        log('未知的方法调用: ${call.method}');
     }
   }
   
@@ -188,7 +189,7 @@ class FloatingActionService {
     try {
       await showQuickMenu();
     } catch (e) {
-      print('处理悬浮按钮点击失败: $e');
+      log('处理悬浮按钮点击失败: $e');
     }
   }
   
@@ -218,10 +219,10 @@ class FloatingActionService {
           _onActionCallback?.call('openSettings', {});
           break;
         default:
-          print('未知的快捷操作: $action');
+          log('未知的快捷操作: $action');
       }
     } catch (e) {
-      print('处理快捷操作失败: $e');
+      log('处理快捷操作失败: $e');
     }
   }
   
@@ -235,7 +236,7 @@ class FloatingActionService {
         'reasons': ReportReason.values.map((r) => r.description).toList(),
       });
     } catch (e) {
-      print('显示举报对话框失败: $e');
+      log('显示举报对话框失败: $e');
     }
   }
   
@@ -249,7 +250,7 @@ class FloatingActionService {
         'types': BlockType.values.map((t) => t.description).toList(),
       });
     } catch (e) {
-      print('显示屏蔽对话框失败: $e');
+      log('显示屏蔽对话框失败: $e');
     }
   }
   
@@ -262,7 +263,7 @@ class FloatingActionService {
       final result = await _channel.invokeMethod('isSupported');
       return result as bool? ?? false;
     } catch (e) {
-      print('检查悬浮窗支持失败: $e');
+      log('检查悬浮窗支持失败: $e');
       return false;
     }
   }

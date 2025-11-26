@@ -1,4 +1,5 @@
 import '../models/ai_provider_model.dart';
+import 'dart:developer';
 import '../models/value_template_model.dart';
 import '../models/user_config_model.dart';
 import '../services/storage_service.dart';
@@ -20,7 +21,7 @@ class TestService {
   static Future<TestSummary> runAllTests() async {
     _testResults.clear();
     
-    print('🧪 开始运行功能测试...');
+    log('🧪 开始运行功能测试...');
     
     // 1. 数据存储测试
     await _testStorageService();
@@ -44,7 +45,7 @@ class TestService {
     await _testIntegration();
     
     final summary = _generateTestSummary();
-    print('✅ 测试完成！通过: ${summary.passedCount}/${summary.totalCount}');
+    log('✅ 测试完成！通过: ${summary.passedCount}/${summary.totalCount}');
     
     return summary;
   }
@@ -186,7 +187,7 @@ class TestService {
           
           // 验证导出数据不为空
           if (exported.isEmpty) {
-            print('导出数据为空');
+            log('导出数据为空');
             return false;
           }
           
@@ -194,7 +195,7 @@ class TestService {
           final success = await UserConfigService.importUserConfig(exported);
           
           if (!success) {
-            print('导入配置失败');
+            log('导入配置失败');
             return false;
           }
           
@@ -203,7 +204,7 @@ class TestService {
           return importedConfig != null;
           
         } catch (e) {
-          print('导入用户配置失败: $e');
+          log('导入用户配置失败: $e');
           return false;
         }
       },
@@ -340,7 +341,7 @@ class TestService {
           return backupData.metadata.isNotEmpty &&
                  backupData.version.isNotEmpty;
         } catch (e) {
-          print('备份测试异常: $e');
+          log('备份测试异常: $e');
           return false;
         }
       },
@@ -405,7 +406,7 @@ class TestService {
                  retrievedTemplate != null &&
                  userConfig != null;
         } catch (e) {
-          print('集成测试异常: $e');
+          log('集成测试异常: $e');
           return false;
         }
       },
@@ -417,7 +418,7 @@ class TestService {
     final startTime = DateTime.now();
     
     try {
-      print('🔍 运行测试: $name');
+      log('🔍 运行测试: $name');
       final result = await test();
       final duration = DateTime.now().difference(startTime);
       
@@ -429,9 +430,9 @@ class TestService {
       ));
       
       if (result) {
-        print('✅ $name - 通过 (${duration.inMilliseconds}ms)');
+        log('✅ $name - 通过 (${duration.inMilliseconds}ms)');
       } else {
-        print('❌ $name - 失败 (${duration.inMilliseconds}ms)');
+        log('❌ $name - 失败 (${duration.inMilliseconds}ms)');
       }
     } catch (e) {
       final duration = DateTime.now().difference(startTime);
@@ -443,7 +444,7 @@ class TestService {
         error: e.toString(),
       ));
       
-      print('💥 $name - 异常: $e (${duration.inMilliseconds}ms)');
+      log('💥 $name - 异常: $e (${duration.inMilliseconds}ms)');
     }
   }
   
@@ -483,9 +484,9 @@ class TestService {
       final analysisBox = StorageService.analysisResultBox;
       await analysisBox.delete('test_analysis');
       
-      print('🧹 测试数据清理完成');
+      log('🧹 测试数据清理完成');
     } catch (e) {
-      print('❌ 清理测试数据失败: $e');
+      log('❌ 清理测试数据失败: $e');
     }
   }
 }

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:developer';
 import 'package:flutter/foundation.dart';
 
 import '../models/behavior_model.dart';
@@ -68,7 +69,7 @@ class ContentProvider extends ChangeNotifier {
         _analysisHistory = _analysisHistory.take(100).toList();
       }
     } catch (e) {
-      print('加载分析历史失败: $e');
+      log('加载分析历史失败: $e');
     }
   }
 
@@ -81,7 +82,7 @@ class ContentProvider extends ChangeNotifier {
         limit: 50,
       );
     } catch (e) {
-      print('加载最近行为失败: $e');
+      log('加载最近行为失败: $e');
     }
   }
 
@@ -154,7 +155,7 @@ class ContentProvider extends ChangeNotifier {
             }
           }
         } catch (e) {
-          print('AI分析失败，使用本地分析结果: $e');
+          log('AI分析失败，使用本地分析结果: $e');
         }
       }
       
@@ -267,14 +268,14 @@ $userValues
           final jsonData = _parseAIResponse(response.content);
           return jsonData;
         } catch (e) {
-          print('解析AI响应失败: $e');
+          log('解析AI响应失败: $e');
           return null;
         }
       }
       
       return null;
     } catch (e) {
-      print('AI分析请求失败: $e');
+      log('AI分析请求失败: $e');
       return null;
     }
   }
@@ -324,7 +325,7 @@ $userValues
         };
       }
     } catch (e) {
-      print('JSON解析错误: $e');
+      log('JSON解析错误: $e');
     }
     
     // 返回默认分析结果

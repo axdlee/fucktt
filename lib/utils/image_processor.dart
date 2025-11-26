@@ -1,5 +1,7 @@
 import 'dart:typed_data';
+import 'dart:developer';
 import 'package:flutter/foundation.dart';
+import 'package:image/image.dart' as img;
 
 /// 图像处理核心类
 /// 提供预处理、压缩和缓存功能
@@ -68,41 +70,85 @@ class ImageProcessor {
 
   /// 压缩图像
   Future<Uint8List> _compressImage(Uint8List data) async {
-    // 根据原始大小决定压缩比例
-    final originalSize = data.length;
-    int quality = 90;
+    try {
+      final image = img.decodeImage(data);
+      if (image == null) return data;
 
-    if (originalSize > 2 * 1024 * 1024) {
-      // > 2MB
-      quality = 70;
-    } else if (originalSize > 5 * 1024 * 1024) {
-      // > 5MB
-      quality = 50;
+      // 根据原始大小决定压缩质量
+      final originalSize = data.length;
+      int quality = 90;
+
+      if (originalSize > 5 * 1024 * 1024) {
+        // > 5MB - 高压缩
+        quality = 60;
+      } else if (originalSize > 2 * 1024 * 1024) {
+        // > 2MB - 中压缩
+        quality = 75;
+      }
+
+      // 使用JPEG压缩
+      final compressed = img.encodeJpg(image, quality: quality);
+      return Uint8List.fromList(compressed);
+    } catch (e) {
+      log('图像压缩失败: $e', name: 'ImageProcessor');
+      return data;
     }
-
-    final compressed = Uint8List.fromList(data.sublist(0, originalSize));
-    return compressed;
   }
 
   /// 增强对比度
   Future<Uint8List> _enhanceContrast(Uint8List data) async {
-    // 这里应该调用图像处理库，比如 image
-    // 实现对比度增强算法
-    return data; // 返回增强后的图像
+    try {
+      final image = img.decodeImage(data);
+      if (image == null) return data;
+
+      // 应用对比度增强
+      final enhanced = img.adjustColor(image, contrast: 1.2);
+      return Uint8List.fromList(img.encodeJpg(enhanced, quality: 90));
+    } catch (e) {
+      log('对比度增强失败: $e', name: 'ImageProcessor');
+      return data;
+    }
   }
 
   /// 去噪处理
   Future<Uint8List> _removeNoise(Uint8List data) async {
-    // 高斯模糊或中值滤波
-    return data;
+    try {
+      final image = img.decodeImage(data);
+      if (image == null) return data;
+
+      // 应用高斯模糊去噪
+      final denoised = img.gaussianBlur(image, radius: 1);
+      return Uint8List.fromList(img.encodeJpg(denoised, quality: 90));
+    } catch (e) {
+      log('去噪处理失败: $e', name: 'ImageProcessor');
+      return data;
+    }
   }
 
   /// 调整图像大小
   Future<Uint8List> _resizeImage(Uint8List data,
       {required int maxWidth}) async {
-    // 保持宽高比的缩放
-    // 实现代码省略
-    return data;
+    try {
+      final image = img.decodeImage(data);
+      if (image == null) return data;
+
+      // 计算新的尺寸，保持宽高比
+      final aspectRatio = image.height / image.width;
+      final newWidth = maxWidth;
+      final newHeight = (maxWidth * aspectRatio).round();
+
+      // 调整大小
+      final resized = img.copyResize(image,
+        width: newWidth,
+        height: newHeight,
+        interpolation: img.Interpolation.linear
+      );
+
+      return Uint8List.fromList(img.encodeJpg(resized, quality: 90));
+    } catch (e) {
+      log('图像缩放失败: $e', name: 'ImageProcessor');
+      return data;
+    }
   }
 
   /// 生成缓存键
